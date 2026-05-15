@@ -1542,13 +1542,34 @@ a { text-decoration:none; }
 })();
 
 /* ── CORE: decode + populate + events ── */
-(()=>{
-  /* ── decode proposal ── */
+(async ()=>{
+  /* ── decode proposal — suporta ?id=BC-001 (curto) e ?p=BASE64 (legado) ── */
   let prop = null;
+  const params = new URLSearchParams(window.location.search);
+  const shortId = params.get('id');
+  const rawB64  = params.get('p');
+
   try {
-    const raw = new URLSearchParams(window.location.search).get('p');
-    if(!raw) throw new Error('no data');
-    prop = JSON.parse(decodeURIComponent(escape(atob(raw.replace(/-/g,'+').replace(/_/g,'/')))));
+    if(shortId){
+      /* Link curto: busca no Supabase */
+      const _sb = window.supabase.createClient(
+        'https://uazqpyjhvtaqqzousvtg.supabase.co',
+        'sb_publishable_S1IlEcoDvl6p1pEnFuqqYw__nwtUDeU'
+      );
+      const { data, error } = await _sb
+        .from('bc_docs')
+        .select('data')
+        .eq('id', shortId)
+        .maybeSingle();
+      if(error || !data) throw new Error('not found');
+      prop = data.data;
+    } else if(rawB64){
+      /* Link longo legado: decodifica base64 */
+      prop = JSON.parse(decodeURIComponent(escape(atob(rawB64.replace(/-/g,'+').replace(/_/g,'/')))));
+    } else {
+      throw new Error('no data');
+    }
+    if(!prop || typeof prop !== 'object') throw new Error('invalid');
   } catch(e) {
     document.getElementById('mainView').style.display = 'none';
     document.getElementById('errorScreen').classList.add('show');

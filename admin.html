@@ -3153,21 +3153,34 @@ function nextContractNumber(){
 
 let _contractEditId = null;
 
-function generateContractLink(id){
+async function generateContractLink(id){
   const contract = getContracts().find(c=>c.id===id);
   if(!contract){ toast('Contrato não encontrado.','error'); return; }
   const cfg = loadCfg();
   const data = Object.assign({}, contract, { _wpp: cfg.wpp||'', _type:'contrato' });
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))))
-    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
   const base = window.location.origin + window.location.pathname.replace('admin.html','');
-  const link = `${base}ver.html?p=${encoded}`;
-  navigator.clipboard.writeText(link).then(()=>{
-    toast('🔗 Link do contrato copiado!','success');
-    const list = getContracts();
-    const idx = list.findIndex(c=>c.id===id);
-    if(idx>=0 && list[idx].status==='rascunho'){ list[idx].status='enviado'; saveContracts(list); renderContractList(); }
-  }).catch(()=>{ prompt('Copie o link:', link); });
+
+  try {
+    const { error } = await sbClient.from('bc_docs').upsert(
+      { id: contract.number, type:'contrato', data, updated_at: new Date().toISOString() },
+      { onConflict: 'id' }
+    );
+    if(error) throw error;
+    const link = `${base}ver.html?id=${encodeURIComponent(contract.number)}`;
+    await navigator.clipboard.writeText(link);
+    toast('🔗 Link curto do contrato copiado!','success');
+  } catch(e) {
+    console.warn('[sb] contract link fallback:', e);
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))))
+      .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+    const link = `${base}ver.html?p=${encoded}`;
+    try { await navigator.clipboard.writeText(link); } catch(_){ prompt('Copie o link:', link); }
+    toast('🔗 Link copiado (modo offline).','success');
+  }
+
+  const list = getContracts();
+  const idx = list.findIndex(c=>c.id===id);
+  if(idx>=0 && list[idx].status==='rascunho'){ list[idx].status='enviado'; saveContracts(list); renderContractList(); }
 }
 
 function renderContractList(){
@@ -3258,29 +3271,41 @@ function wireContracts(){
   document.getElementById('contractSaveBtn').addEventListener('click', saveContract);
 }
 
-function generatePropLink(id){
+async function generatePropLink(id){
   const prop = getProposals().find(p=>p.id===id);
   if(!prop){ toast('Proposta não encontrada.','error'); return; }
   const cfg = loadCfg();
-  // embed wpp so ver.html can build the WhatsApp link
   const data = Object.assign({}, prop, { _wpp: cfg.wpp||'' });
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))))
-    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
   const base = window.location.origin + window.location.pathname.replace('admin.html','');
-  const link = `${base}ver.html?p=${encoded}`;
-  navigator.clipboard.writeText(link).then(()=>{
-    toast('🔗 Link copiado! Cole e envie pro cliente.','success');
-    // also mark proposal as "enviada" automatically
-    const props = getProposals();
-    const idx = props.findIndex(p=>p.id===id);
-    if(idx>=0 && props[idx].status==='rascunho'){
-      props[idx].status='enviada';
-      saveProposals(props);
-      renderPropList();
-    }
-  }).catch(()=>{
-    prompt('Copie o link abaixo:', link);
-  });
+
+  /* Tenta salvar no Supabase e gerar link curto */
+  try {
+    const { error } = await sbClient.from('bc_docs').upsert(
+      { id: prop.number, type:'proposta', data, updated_at: new Date().toISOString() },
+      { onConflict: 'id' }
+    );
+    if(error) throw error;
+    const link = `${base}ver.html?id=${encodeURIComponent(prop.number)}`;
+    await navigator.clipboard.writeText(link);
+    toast('🔗 Link curto copiado! Cole e envie pro cliente.','success');
+  } catch(e) {
+    /* fallback: link longo (base64) */
+    console.warn('[sb] prop link fallback:', e);
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))))
+      .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+    const link = `${base}ver.html?p=${encoded}`;
+    try { await navigator.clipboard.writeText(link); } catch(_){ prompt('Copie o link:', link); }
+    toast('🔗 Link copiado (modo offline).','success');
+  }
+
+  /* Marca como enviada */
+  const props = getProposals();
+  const idx = props.findIndex(p=>p.id===id);
+  if(idx>=0 && props[idx].status==='rascunho'){
+    props[idx].status='enviada';
+    saveProposals(props);
+    renderPropList();
+  }
 }
 
 function renderPropList(){
