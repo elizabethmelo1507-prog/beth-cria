@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Catálogo Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--c-bg);
+      color: var(--c-text);
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── REVEAL ANIMATION ─── */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s cubic-bezier(.25,.46,.45,.94), transform .7s cubic-bezier(.25,.46,.45,.94); }
+    .reveal.vis { opacity: 1; transform: none; }
+    .reveal-delay-1 { transition-delay: .1s; }
+    .reveal-delay-2 { transition-delay: .22s; }
+    .reveal-delay-3 { transition-delay: .34s; }
+    .reveal-delay-4 { transition-delay: .46s; }
+
+    /* ─── NAV ─── */
+    .cn {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: 72px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 56px;
+      background: var(--c-nav-bg); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--c-bdr);
+      transition: background .3s;
+    }
+    .cn-agent { display: flex; flex-direction: column; gap: 1px; }
+    .cn-name { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 1.05rem; letter-spacing: .04em; color: var(--c-text); line-height: 1; }
+    .cn-role { font-size: .62rem; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--c-muted); }
+    .cn-center { font-size: .6rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--c-muted); opacity: .6; }
+    .cn-cta {
+      font-size: .65rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
+      background: var(--c-accent); color: var(--c-bg);
+      padding: 10px 24px; transition: opacity .2s;
+    }
+    .cn-cta:hover { opacity: .85; }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh; background: var(--c-hero-bg); position: relative;
+      display: grid; grid-template-columns: 1fr 1fr; padding-top: 72px;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 72px 72px;
+    }
+    .hero-left { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: center; padding: 80px 64px 80px 72px; }
+    .hero-eyebrow { font-size: .62rem; font-weight: 500; letter-spacing: .28em; text-transform: uppercase; color: var(--c-accent); margin-bottom: 32px; display: flex; align-items: center; gap: 12px; }
+    .hero-eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--c-accent); display: block; flex-shrink: 0; }
+    .hero-h { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-style: italic; font-size: clamp(4rem, 7.5vw, 8rem); line-height: .88; color: var(--c-hero-text); margin-bottom: 16px; }
+    .hero-h em { font-style: normal; display: block; }
+    .hero-h .accent-line { color: var(--c-accent); }
+    .hero-city { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-style: italic; font-size: clamp(1.4rem, 2.5vw, 2.2rem); color: rgba(255,255,255,.45); margin-bottom: 48px; letter-spacing: .02em; }
+    .hero-desc { font-size: .92rem; font-weight: 400; line-height: 1.85; color: rgba(255,255,255,.55); max-width: 380px; margin-bottom: 48px; }
+    .hero-desc strong { color: rgba(255,255,255,.85); font-weight: 500; }
+    .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-prim { font-size: .68rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; background: var(--c-accent); color: var(--c-bg); padding: 15px 36px; display: inline-block; transition: opacity .2s; }
+    .btn-prim:hover { opacity: .88; }
+    .btn-ghost { font-size: .68rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; border: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.75); padding: 14px 36px; display: inline-block; transition: border-color .2s; }
+    .btn-ghost:hover { border-color: rgba(255,255,255,.6); }
+
+    /* hero right — photo */
+    .hero-right { position: relative; overflow: hidden; }
+    .hero-photo-wrap { width: 100%; height: 100%; background: rgba(255,255,255,.04); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+    .hero-photo-placeholder { width: 100%; height: 100%; position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+    .hero-photo-icon { width: 80px; height: 80px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; opacity: .3; }
+    .hero-photo-label { font-size: .6rem; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.1); padding: 7px 18px; }
+    .hero-photo-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 180px; background: linear-gradient(transparent, var(--c-hero-bg)); }
+
+    /* hero stats */
+    .hero-stats { position: absolute; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid rgba(255,255,255,.07); z-index: 3; }
+    .hero-stat { padding: 28px 40px; border-right: 1px solid rgba(255,255,255,.07); }
+    .hero-stat:last-child { border-right: none; }
+    .hs-val { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 2.4rem; line-height: 1; color: var(--c-hero-text); }
+    .hs-val em { font-style: normal; color: var(--c-accent); font-size: 1.5rem; }
+    .hs-lab { font-size: .62rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-top: 6px; }
+
+    /* ─── SOBRE ─── */
+    .sobre { display: grid; grid-template-columns: 1fr 1fr; min-height: 600px; }
+    .sobre-photo { background: var(--c-dark-section); position: relative; overflow: hidden; display: flex; align-items: flex-end; }
+    .sobre-photo-ph { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+    .sobre-photo-ph-icon { font-size: 5rem; opacity: .15; }
+    .sobre-photo-ph-label { font-size: .58rem; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.1); padding: 7px 18px; }
+    .sobre-photo-name { position: absolute; bottom: 40px; left: 40px; right: 40px; }
+    .sobre-photo-name-txt { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-style: italic; font-size: 1.8rem; color: #fff; line-height: 1.1; }
+    .sobre-photo-name-role { font-size: .6rem; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--c-accent); margin-top: 6px; }
+    .sobre-photo-line { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--c-accent); }
+    .sobre-txt { background: var(--c-surface); padding: 80px 72px; display: flex; flex-direction: column; justify-content: center; }
+    .section-tag { font-size: .6rem; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: var(--c-accent); margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+    .section-tag::before { content: ''; width: 20px; height: 1px; background: var(--c-accent); display: block; }
+    .section-h { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-style: italic; font-size: clamp(2.4rem, 4vw, 3.8rem); line-height: .9; color: var(--c-text); margin-bottom: 28px; }
+    .section-h em { color: var(--c-accent); font-style: normal; }
+    .sobre-p { font-size: .93rem; font-weight: 400; color: var(--c-muted); line-height: 1.9; margin-bottom: 14px; }
+    .sobre-p strong { color: var(--c-text); font-weight: 500; }
+    .sobre-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 36px; }
+    .s-chip { font-size: .58rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 7px 14px; border: 1px solid var(--c-bdr); color: var(--c-muted); }
+    .s-chip.hi { background: var(--c-accent); color: var(--c-bg); border-color: var(--c-accent); }
+
+    /* ─── IMOVEIS ─── */
+    .imoveis { padding: 112px 72px; background: var(--c-bg); }
+    .section-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 64px; gap: 32px; }
+    .big-h { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-style: italic; font-size: clamp(3rem, 5.5vw, 5.5rem); line-height: .88; color: var(--c-text); }
+    .big-h em { color: var(--c-accent); font-style: normal; }
+    .section-sub { max-width: 280px; font-size: .9rem; font-weight: 400; color: var(--c-muted); line-height: 1.75; text-align: right; }
+
+    /* property grid */
+    .prop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+    .prop-card { background: var(--c-surface); overflow: hidden; position: relative; transition: transform .3s, box-shadow .3s; cursor: default; }
+    .prop-card:hover { transform: translateY(-3px); box-shadow: 0 16px 56px rgba(0,0,0,.12); }
+    .prop-card.feat { grid-column: span 2; }
+    .prop-img { position: relative; overflow: hidden; background: var(--c-card-bg-img); display: flex; align-items: center; justify-content: center; }
+    .prop-card:not(.feat) .prop-img { height: 220px; }
+    .prop-card.feat .prop-img { height: 300px; }
+    .prop-img-inner { width: 100%; height: 100%; position: relative; }
+    .prop-img-num { position: absolute; top: 20px; left: 20px; font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 3rem; line-height: 1; color: rgba(255,255,255,.12); pointer-events: none; }
+    .prop-badge { position: absolute; top: 18px; left: 18px; font-size: .58rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; background: var(--c-accent); color: var(--c-bg); padding: 5px 12px; }
+    .prop-price { position: absolute; bottom: 18px; right: 18px; font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 1.15rem; background: var(--c-surface); color: var(--c-text); padding: 7px 14px; line-height: 1; }
+    .prop-body { padding: 26px 28px 0; }
+    .prop-type { font-size: .58rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--c-accent); margin-bottom: 7px; }
+    .prop-name { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 1.25rem; color: var(--c-text); line-height: 1.15; margin-bottom: 8px; }
+    .prop-loc { font-size: .78rem; color: var(--c-muted); margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+    .prop-loc svg { width: 12px; height: 12px; fill: none; stroke: var(--c-muted); stroke-width: 1.5; flex-shrink: 0; }
+    .prop-specs { display: flex; gap: 18px; padding-bottom: 20px; border-bottom: 1px solid var(--c-bdr); }
+    .prop-spec { font-size: .76rem; color: var(--c-muted); display: flex; flex-direction: column; gap: 2px; }
+    .prop-spec strong { font-size: .95rem; font-weight: 600; color: var(--c-text); font-family: 'Cormorant Garamond', serif; }
+    .prop-cta { display: block; padding: 14px 28px; font-size: .62rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; text-align: center; color: var(--c-accent); border-top: 1px solid var(--c-bdr); transition: background .2s, color .2s; }
+    .prop-cta:hover { background: var(--c-accent); color: var(--c-bg); }
+
+    /* ─── STATS BAND ─── */
+    .stats { background: var(--c-dark-section); padding: 96px 72px; }
+    .stats-inner { max-width: 1100px; margin: 0 auto; }
+    .stats-label { font-size: .6rem; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: var(--c-accent); margin-bottom: 52px; display: flex; align-items: center; gap: 12px; }
+    .stats-label::before { content: ''; width: 28px; height: 1px; background: var(--c-accent); }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 1px solid rgba(255,255,255,.07); }
+    .stat-item { padding: 48px 40px 48px 0; border-right: 1px solid rgba(255,255,255,.07); }
+    .stat-item:last-child { border-right: none; }
+    .stat-val { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-style: italic; font-size: clamp(3.5rem, 5vw, 5.5rem); line-height: 1; color: #fff; margin-bottom: 8px; }
+    .stat-val em { font-style: normal; color: var(--c-accent); }
+    .stat-lab { font-size: .68rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.35); line-height: 1.5; }
+
+    /* ─── DIFERENCIAIS ─── */
+    .diff { padding: 112px 72px; background: var(--c-surface); border-top: 1px solid var(--c-bdr); }
+    .diff-inner { max-width: 1100px; margin: 0 auto; }
+    .diff-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 64px; }
+    .diff-item { padding: 48px 40px; background: var(--c-bg); position: relative; overflow: hidden; }
+    .diff-item::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: var(--c-accent); transition: width .5s; }
+    .diff-item:hover::after { width: 100%; }
+    .diff-num { font-family: 'Cormorant Garamond', serif; font-weight: 700; font-style: italic; font-size: 4.5rem; line-height: 1; color: var(--c-accent); opacity: .12; margin-bottom: 16px; }
+    .diff-title { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 1.35rem; color: var(--c-text); margin-bottom: 12px; line-height: 1.2; }
+    .diff-desc { font-size: .86rem; font-weight: 400; color: var(--c-muted); line-height: 1.85; }
+
+    /* ─── CONTATO ─── */
+    .contato { padding: 112px 72px; background: var(--c-bg); border-top: 1px solid var(--c-bdr); }
+    .contato-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 96px; align-items: start; }
+    .contato-left { padding-top: 8px; }
+    .contato-p { font-size: .93rem; font-weight: 400; color: var(--c-muted); line-height: 1.9; margin: 20px 0 44px; }
+    .contato-info { display: flex; flex-direction: column; gap: 24px; }
+    .c-info-item { display: flex; gap: 18px; align-items: flex-start; }
+    .c-info-icon { width: 42px; height: 42px; border: 1px solid var(--c-bdr); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+    .c-info-label { font-size: .58rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--c-muted); margin-bottom: 3px; }
+    .c-info-val { font-size: .95rem; font-weight: 500; color: var(--c-text); }
+    .contato-right { background: var(--c-dark-section); padding: 56px; }
+    .form-title { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-style: italic; font-size: 2rem; color: #fff; margin-bottom: 32px; line-height: 1.1; }
+    .cf-field { margin-bottom: 14px; }
+    .cf-field input,
+    .cf-field textarea { width: 100%; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); padding: 15px 18px; font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 400; color: #fff; outline: none; transition: border-color .2s; resize: none; }
+    .cf-field textarea { min-height: 110px; }
+    .cf-field input::placeholder, .cf-field textarea::placeholder { color: rgba(255,255,255,.28); }
+    .cf-field input:focus, .cf-field textarea:focus { border-color: var(--c-accent); }
+    .cf-submit { width: 100%; background: var(--c-accent); color: var(--c-bg); font-family: 'DM Sans', sans-serif; font-size: .68rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; padding: 17px; border: none; cursor: pointer; transition: opacity .2s; margin-top: 6px; }
+    .cf-submit:hover { opacity: .88; }
+
+    /* ─── FOOTER ─── */
+    .footer { background: var(--c-dark-section); border-top: 1px solid rgba(255,255,255,.06); padding: 36px 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .footer-agent { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-style: italic; font-size: 1.15rem; color: rgba(255,255,255,.75); }
+    .footer-made { font-size: .6rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.25); }
+    .footer-made a { color: var(--c-accent); }
+
+    /* ─── WPP FLOAT ─── */
+    .wpp-float {
+      position: fixed; bottom: 32px; right: 32px; z-index: 300;
+      width: 54px; height: 54px; background: #25D366;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 32px rgba(37,211,102,.35);
+      transition: transform .2s;
+    }
+    .wpp-float:hover { transform: scale(1.08); }
+    .wpp-float svg { width: 26px; height: 26px; fill: #fff; }
+
+    /* ─── RESPONSIVE ─── */
+    @media(max-width: 960px) {
+      .cn { padding: 0 24px; }
+      .cn-center { display: none; }
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .hero-right { min-height: 360px; display: block; }
+      .hero-left { padding: 60px 28px 48px; }
+      .hero-stats { grid-template-columns: repeat(2, 1fr); }
+      .hero-stat { padding: 20px 24px; }
+      .sobre { grid-template-columns: 1fr; }
+      .sobre-photo { min-height: 320px; }
+      .sobre-txt { padding: 56px 28px; }
+      .imoveis { padding: 72px 28px; }
+      .prop-grid { grid-template-columns: 1fr; }
+      .prop-card.feat { grid-column: span 1; }
+      .stats { padding: 72px 28px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-item { padding: 36px 24px 36px 0; }
+      .diff { padding: 72px 28px; }
+      .diff-grid { grid-template-columns: 1fr; }
+      .contato { padding: 72px 28px; }
+      .contato-inner { grid-template-columns: 1fr; gap: 48px; }
+      .contato-right { padding: 36px 28px; }
+      .footer { padding: 28px; flex-direction: column; align-items: flex-start; gap: 8px; }
+      .section-sub { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="cn">
+    <div class="cn-agent">
+      <div class="cn-name" id="cnName">Corretor</div>
+      <div class="cn-role">Corretor de Imóveis · CRECI Ativo</div>
+    </div>
+    <div class="cn-center" id="cnCenter">Catálogo Digital</div>
+    <a href="#contato" class="cn-cta" id="cnCta">Falar com corretor</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <div class="hero-left">
+      <div class="hero-eyebrow reveal" id="heroEyebrow">Catálogo Digital · Residencial</div>
+      <h1 class="hero-h reveal reveal-delay-1">
+        <em id="heroFirst">Ana</em>
+        <em id="heroLast">Souza</em>
+      </h1>
+      <p class="hero-city reveal reveal-delay-2" id="heroCity">Curitiba, PR</p>
+      <p class="hero-desc reveal reveal-delay-2">
+        Especialista em <strong id="heroSpec">imóveis residenciais</strong>, atuo com dedicação e transparência para encontrar o imóvel ideal para cada cliente — do primeiro contato à chave na mão.
+      </p>
+      <div class="hero-btns reveal reveal-delay-3">
+        <a href="#imoveis" class="btn-prim">Ver portfólio</a>
+        <a href="#contato" class="btn-ghost">Entrar em contato</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-photo-placeholder">
+        <div class="hero-photo-icon">◻</div>
+        <div class="hero-photo-label">Foto do corretor</div>
+      </div>
+      <div class="hero-photo-overlay"></div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hs-val">150<em>+</em></div>
+        <div class="hs-lab">Imóveis negociados</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hs-val">8<em>+</em></div>
+        <div class="hs-lab">Anos no mercado</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hs-val">98<em>%</em></div>
+        <div class="hs-lab">Clientes satisfeitos</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hs-val">CRECI</div>
+        <div class="hs-lab">Ativo e regularizado</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOBRE -->
+  <section class="sobre" id="sobre">
+    <div class="sobre-photo">
+      <div class="sobre-photo-ph">
+        <div class="sobre-photo-ph-icon">◻</div>
+        <div class="sobre-photo-ph-label">Foto profissional</div>
+      </div>
+      <div class="sobre-photo-name">
+        <div class="sobre-photo-name-txt" id="spName">Ana Souza</div>
+        <div class="sobre-photo-name-role" id="spRole">Especialista Residencial · Curitiba</div>
+      </div>
+      <div class="sobre-photo-line"></div>
+    </div>
+    <div class="sobre-txt">
+      <div class="section-tag reveal">Sobre mim</div>
+      <h2 class="section-h reveal reveal-delay-1">Seu corretor<br>de confiança<br>em <em id="sobreCity">Curitiba</em></h2>
+      <p class="sobre-p reveal reveal-delay-2">Sou corretor de imóveis com anos de experiência no segmento <strong id="sobreSpec">Residencial</strong>, atuando na região de <strong id="sobreCity2">Curitiba</strong>. Meu trabalho começa ouvindo — entendo o que você realmente precisa antes de apresentar qualquer opção.</p>
+      <p class="sobre-p reveal reveal-delay-2">Da busca ao contrato, cuido de cada detalhe com atenção e transparência. Minha missão é que você se sinta seguro em cada etapa.</p>
+      <div class="sobre-chips reveal reveal-delay-3">
+        <span class="s-chip hi" id="chipSpec">Residencial</span>
+        <span class="s-chip hi" id="chipCity">Curitiba</span>
+        <span class="s-chip">CRECI Ativo</span>
+        <span class="s-chip">Financiamento CAIXA</span>
+        <span class="s-chip">Avaliação gratuita</span>
+        <span class="s-chip">Permuta</span>
+      </div>
+      <a href="#contato" class="btn-prim reveal reveal-delay-4" style="width:fit-content">Agendar conversa →</a>
+    </div>
+  </section>
+
+  <!-- IMOVEIS -->
+  <section class="imoveis" id="imoveis">
+    <div class="section-head reveal">
+      <h2 class="big-h">Portfólio<br>de <em>imóveis</em></h2>
+      <p class="section-sub" id="imoveisSub">Seleção de imóveis disponíveis. Entre em contato para ver mais opções.</p>
+    </div>
+    <div class="prop-grid">
+
+      <div class="prop-card feat reveal">
+        <div class="prop-img" style="height:300px;background:linear-gradient(135deg,var(--c-card-grad-a),var(--c-card-grad-b));">
+          <div class="prop-img-inner">
+            <span class="prop-img-num">01</span>
+            <span class="prop-badge cat-badge-spec">Residencial</span>
+            <div class="prop-price">R$ 850.000</div>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-type">Destaque</div>
+          <div class="prop-name">Apartamento 3 quartos — Alto padrão</div>
+          <div class="prop-loc">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span class="card-loc">Curitiba – PR</span>
+          </div>
+          <div class="prop-specs">
+            <div class="prop-spec"><strong>3</strong> quartos</div>
+            <div class="prop-spec"><strong>2</strong> banheiros</div>
+            <div class="prop-spec"><strong>2</strong> vagas</div>
+            <div class="prop-spec"><strong>120</strong> m²</div>
+          </div>
+        </div>
+        <a href="#contato" class="prop-cta">Tenho interesse →</a>
+      </div>
+
+      <div class="prop-card reveal reveal-delay-1">
+        <div class="prop-img" style="height:220px;background:linear-gradient(160deg,var(--c-card-grad-b),var(--c-card-grad-a));">
+          <div class="prop-img-inner">
+            <span class="prop-img-num">02</span>
+            <span class="prop-badge cat-badge-spec">Residencial</span>
+            <div class="prop-price">R$ 1.400.000</div>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-type">Casa</div>
+          <div class="prop-name">Casa em condomínio fechado</div>
+          <div class="prop-loc">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span class="card-loc">Curitiba – PR</span>
+          </div>
+          <div class="prop-specs">
+            <div class="prop-spec"><strong>4</strong> quartos</div>
+            <div class="prop-spec"><strong>280</strong> m²</div>
+          </div>
+        </div>
+        <a href="#contato" class="prop-cta">Tenho interesse →</a>
+      </div>
+
+      <div class="prop-card reveal">
+        <div class="prop-img" style="height:220px;background:linear-gradient(135deg,var(--c-card-grad-a),var(--c-card-grad-b));">
+          <div class="prop-img-inner">
+            <span class="prop-img-num">03</span>
+            <span class="prop-badge cat-badge-spec">Residencial</span>
+            <div class="prop-price">R$ 420.000</div>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-type">Apartamento</div>
+          <div class="prop-name">Studio moderno — Região central</div>
+          <div class="prop-loc">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span class="card-loc">Curitiba – PR</span>
+          </div>
+          <div class="prop-specs">
+            <div class="prop-spec"><strong>1</strong> quarto</div>
+            <div class="prop-spec"><strong>45</strong> m²</div>
+          </div>
+        </div>
+        <a href="#contato" class="prop-cta">Tenho interesse →</a>
+      </div>
+
+      <div class="prop-card reveal reveal-delay-1">
+        <div class="prop-img" style="height:220px;background:linear-gradient(160deg,var(--c-card-grad-b),var(--c-card-grad-a));">
+          <div class="prop-img-inner">
+            <span class="prop-img-num">04</span>
+            <span class="prop-badge cat-badge-spec">Residencial</span>
+            <div class="prop-price">R$ 320.000</div>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-type">Terreno</div>
+          <div class="prop-name">Terreno em área nobre</div>
+          <div class="prop-loc">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span class="card-loc">Curitiba – PR</span>
+          </div>
+          <div class="prop-specs">
+            <div class="prop-spec"><strong>360</strong> m²</div>
+            <div class="prop-spec">Arborizado</div>
+          </div>
+        </div>
+        <a href="#contato" class="prop-cta">Tenho interesse →</a>
+      </div>
+
+      <div class="prop-card feat reveal reveal-delay-2">
+        <div class="prop-img" style="height:300px;background:linear-gradient(135deg,var(--c-card-grad-b),var(--c-card-grad-a));">
+          <div class="prop-img-inner">
+            <span class="prop-img-num">05</span>
+            <span class="prop-badge cat-badge-spec">Residencial</span>
+            <div class="prop-price">R$ 680.000</div>
+          </div>
+        </div>
+        <div class="prop-body">
+          <div class="prop-type">Sobrado</div>
+          <div class="prop-name">Sobrado 3 quartos — Bairro nobre</div>
+          <div class="prop-loc">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <span class="card-loc">Curitiba – PR</span>
+          </div>
+          <div class="prop-specs">
+            <div class="prop-spec"><strong>3</strong> quartos</div>
+            <div class="prop-spec"><strong>2</strong> banheiros</div>
+            <div class="prop-spec"><strong>160</strong> m²</div>
+          </div>
+        </div>
+        <a href="#contato" class="prop-cta">Tenho interesse →</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats">
+    <div class="stats-inner">
+      <div class="stats-label reveal">Resultados comprovados</div>
+      <div class="stats-grid">
+        <div class="stat-item reveal">
+          <div class="stat-val">150<em>+</em></div>
+          <div class="stat-lab">Imóveis negociados</div>
+        </div>
+        <div class="stat-item reveal reveal-delay-1">
+          <div class="stat-val">8<em>+</em></div>
+          <div class="stat-lab">Anos de experiência</div>
+        </div>
+        <div class="stat-item reveal reveal-delay-2">
+          <div class="stat-val">98<em>%</em></div>
+          <div class="stat-lab">Clientes satisfeitos</div>
+        </div>
+        <div class="stat-item reveal reveal-delay-3">
+          <div class="stat-val">30<em>d</em></div>
+          <div class="stat-lab">Tempo médio de venda</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIFERENCIAIS -->
+  <section class="diff" id="diferenciais">
+    <div class="diff-inner">
+      <div class="section-head reveal">
+        <h2 class="big-h">Por que me<br><em>escolher?</em></h2>
+        <p class="section-sub">Mais do que vender imóveis — entrego segurança e tranquilidade em cada etapa.</p>
+      </div>
+      <div class="diff-grid">
+        <div class="diff-item reveal">
+          <div class="diff-num">01</div>
+          <div class="diff-title">Atendimento personalizado</div>
+          <p class="diff-desc">Cada cliente é único. Ouço antes de sugerir. Entendo sua necessidade real antes de apresentar qualquer imóvel.</p>
+        </div>
+        <div class="diff-item reveal reveal-delay-1">
+          <div class="diff-num">02</div>
+          <div class="diff-title">Assessoria completa</div>
+          <p class="diff-desc">Da busca ao contrato, cuido de cada detalhe burocrático para que você não tenha nenhuma surpresa ao longo do processo.</p>
+        </div>
+        <div class="diff-item reveal reveal-delay-2">
+          <div class="diff-num">03</div>
+          <div class="diff-title">Especialista na região</div>
+          <p class="diff-desc">Conheço cada bairro, cada oportunidade. Isso faz toda a diferença na hora de encontrar o imóvel certo pelo preço justo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTATO -->
+  <section class="contato" id="contato">
+    <div class="contato-inner">
+      <div class="contato-left">
+        <div class="section-tag reveal">Vamos conversar</div>
+        <h2 class="section-h reveal reveal-delay-1">Encontre o imóvel<br><em>certo</em> com quem<br>conhece a região.</h2>
+        <p class="contato-p reveal reveal-delay-2">Seja para comprar, vender ou investir — estou aqui para ajudar. Respondo o mais breve possível.</p>
+        <div class="contato-info reveal reveal-delay-3">
+          <div class="c-info-item">
+            <div class="c-info-icon">📱</div>
+            <div>
+              <div class="c-info-label">WhatsApp</div>
+              <div class="c-info-val" id="ciWpp">(11) 9 0000-0000</div>
+            </div>
+          </div>
+          <div class="c-info-item">
+            <div class="c-info-icon">✉</div>
+            <div>
+              <div class="c-info-label">E-mail</div>
+              <div class="c-info-val" id="ciEmail">corretor@email.com</div>
+            </div>
+          </div>
+          <div class="c-info-item">
+            <div class="c-info-icon">◎</div>
+            <div>
+              <div class="c-info-label">Área de atuação</div>
+              <div class="c-info-val" id="ciCity">Curitiba – PR</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="contato-right reveal reveal-delay-1">
+        <div class="form-title">Manda uma<br>mensagem</div>
+        <form onsubmit="return false">
+          <div class="cf-field"><input type="text" id="cfNome" placeholder="Seu nome"/></div>
+          <div class="cf-field"><input type="tel" id="cfTel" placeholder="WhatsApp / Telefone"/></div>
+          <div class="cf-field"><textarea id="cfMsg" placeholder="Qual imóvel você procura? Me conte um pouco…"></textarea></div>
+          <button type="submit" class="cf-submit" id="cfBtn">Enviar mensagem →</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-agent" id="footerAgent">Ana Souza — Corretor de Imóveis</div>
+    <div class="footer-made">Catálogo criado por <a href="#" target="_blank">beth.cria</a> — IA para o mercado imobiliário</div>
+  </footer>
+
+  <!-- WPP FLOAT -->
+  <a href="#contato" class="wpp-float" title="Falar no WhatsApp">
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <script>
+  /* ─── TEMAS ─── */
+  const temas = {
+    noir: {
+      '--c-bg':           '#0e0e0e',
+      '--c-surface':      '#161616',
+      '--c-accent':       '#c9a84c',
+      '--c-text':         '#f0ece4',
+      '--c-muted':        'rgba(240,236,228,.42)',
+      '--c-bdr':          'rgba(255,255,255,.07)',
+      '--c-nav-bg':       'rgba(14,14,14,.96)',
+      '--c-hero-bg':      '#0e0e0e',
+      '--c-hero-text':    '#f0ece4',
+      '--c-dark-section': '#111111',
+      '--c-card-bg-img':  '#1a1a1a',
+      '--c-card-grad-a':  'rgba(201,168,76,.18)',
+      '--c-card-grad-b':  'rgba(201,168,76,.06)',
+    },
+    marfim: {
+      '--c-bg':           '#f5f0e8',
+      '--c-surface':      '#ffffff',
+      '--c-accent':       '#1e4a3a',
+      '--c-text':         '#1c2a22',
+      '--c-muted':        'rgba(28,42,34,.48)',
+      '--c-bdr':          'rgba(28,42,34,.1)',
+      '--c-nav-bg':       'rgba(245,240,232,.96)',
+      '--c-hero-bg':      '#1e4a3a',
+      '--c-hero-text':    '#f5f0e8',
+      '--c-dark-section': '#162e25',
+      '--c-card-bg-img':  '#f0ebe3',
+      '--c-card-grad-a':  'rgba(30,74,58,.25)',
+      '--c-card-grad-b':  'rgba(30,74,58,.08)',
+    },
+    grafite: {
+      '--c-bg':           '#f8f5f1',
+      '--c-surface':      '#ffffff',
+      '--c-accent':       '#a07850',
+      '--c-text':         '#2a2420',
+      '--c-muted':        'rgba(42,36,32,.48)',
+      '--c-bdr':          'rgba(42,36,32,.1)',
+      '--c-nav-bg':       'rgba(248,245,241,.96)',
+      '--c-hero-bg':      '#2a2420',
+      '--c-hero-text':    '#f8f5f1',
+      '--c-dark-section': '#1e1a17',
+      '--c-card-bg-img':  '#f0ebe5',
+      '--c-card-grad-a':  'rgba(160,120,80,.25)',
+      '--c-card-grad-b':  'rgba(160,120,80,.08)',
+    },
+    navy: {
+      '--c-bg':           '#f2f5fb',
+      '--c-surface':      '#ffffff',
+      '--c-accent':       '#162040',
+      '--c-text':         '#162040',
+      '--c-muted':        'rgba(22,32,64,.46)',
+      '--c-bdr':          'rgba(22,32,64,.1)',
+      '--c-nav-bg':       'rgba(242,245,251,.96)',
+      '--c-hero-bg':      '#162040',
+      '--c-hero-text':    '#f2f5fb',
+      '--c-dark-section': '#0f1929',
+      '--c-card-bg-img':  '#eaeff7',
+      '--c-card-grad-a':  'rgba(22,32,64,.2)',
+      '--c-card-grad-b':  'rgba(22,32,64,.06)',
+    },
+    areia: {
+      '--c-bg':           '#faf7f2',
+      '--c-surface':      '#ffffff',
+      '--c-accent':       '#8b6a4a',
+      '--c-text':         '#3a2e24',
+      '--c-muted':        'rgba(58,46,36,.46)',
+      '--c-bdr':          'rgba(58,46,36,.1)',
+      '--c-nav-bg':       'rgba(250,247,242,.96)',
+      '--c-hero-bg':      '#3a2e24',
+      '--c-hero-text':    '#faf7f2',
+      '--c-dark-section': '#2a2018',
+      '--c-card-bg-img':  '#f0ebe3',
+      '--c-card-grad-a':  'rgba(139,106,74,.25)',
+      '--c-card-grad-b':  'rgba(139,106,74,.08)',
+    }
+  };
+
+  /* ─── PARAMS ─── */
+  const p = new URLSearchParams(window.location.search);
+  const nome         = p.get('nome')         || 'Corretor';
+  const cidade       = p.get('cidade')       || 'Sua Cidade';
+  const especialidade = p.get('especialidade') || 'Residencial';
+  const tema         = temas[p.get('tema')]  || temas.noir;
+  const primeiro     = nome.split(' ')[0];
+  const partes       = nome.trim().split(' ');
+  const cidadeShort  = cidade.split('-')[0].trim();
+
+  /* ─── APLICA TEMA ─── */
+  const root = document.documentElement;
+  Object.entries(tema).forEach(([k, v]) => root.style.setProperty(k, v));
+
+  /* ─── INJETA DADOS ─── */
+  document.title = 'Catálogo Digital — ' + nome;
+  document.getElementById('cnName').textContent   = nome;
+  document.getElementById('cnCenter').textContent = 'Catálogo Digital · ' + cidade;
+
+  // Hero
+  document.getElementById('heroFirst').textContent  = partes[0] || nome;
+  document.getElementById('heroLast').textContent   = partes.slice(1).join(' ') || '';
+  document.getElementById('heroEyebrow').textContent = 'Catálogo Digital · ' + especialidade;
+  document.getElementById('heroCity').textContent   = cidade;
+  document.getElementById('heroSpec').textContent   = 'imóveis ' + especialidade.toLowerCase();
+
+  // Sobre
+  document.getElementById('spName').textContent    = nome;
+  document.getElementById('spRole').textContent    = 'Especialista ' + especialidade + ' · ' + cidadeShort;
+  document.getElementById('sobreCity').textContent = cidadeShort;
+  document.getElementById('sobreCity2').textContent = cidadeShort;
+  document.getElementById('sobreSpec').textContent = especialidade;
+  document.getElementById('chipSpec').textContent  = especialidade;
+  document.getElementById('chipCity').textContent  = cidadeShort;
+
+  // Imóveis
+  document.getElementById('imoveisSub').textContent = 'Imóveis disponíveis em ' + cidade;
+  document.querySelectorAll('.card-loc').forEach(el => el.textContent = cidade);
+  document.querySelectorAll('.cat-badge-spec').forEach(el => el.textContent = especialidade);
+
+  // Contato
+  document.getElementById('ciCity').textContent  = cidade;
+  document.getElementById('ciEmail').textContent = primeiro.toLowerCase() + '@email.com';
+
+  // Footer
+  document.getElementById('footerAgent').textContent = nome + ' — Corretor de Imóveis';
+
+  /* ─── CONTATO FORM ─── */
+  document.getElementById('cfBtn').addEventListener('click', function(){
+    const n = document.getElementById('cfNome').value;
+    const m = document.getElementById('cfMsg').value;
+    const txt = encodeURIComponent('Olá ' + primeiro + '! Vi seu catálogo e tenho interesse.\n\nNome: ' + (n||'—') + '\n\n' + (m||'Gostaria de mais informações.'));
+    window.open('https://wa.me/5511900000000?text=' + txt, '_blank');
+  });
+
+  /* ─── REVEAL ON SCROLL ─── */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  </script>
+</body>
+</html>

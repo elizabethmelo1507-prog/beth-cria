@@ -1,0 +1,16 @@
+.DS_Store
+*.mov
+*.mp4
+node_modules/
+.env
+supabase-setup.sql
+calendario-30dias.md
+copy-bethcria.md
+product-marketing-context.md
+semana1-o-lancamento.md
+semana2-o-lancamento.md
+semana3-o-trabalho.md
+semana4-a-conversao.md
+projeto de pagina/
+kit de adesivos/
+ScreenRecording*
