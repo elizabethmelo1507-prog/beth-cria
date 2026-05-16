@@ -684,8 +684,28 @@
     }
     @media(max-width:768px){
       nav{padding:0 20px} .n-links,.n-cta{display:none} .n-ham{display:flex}
-      .hero{padding:100px 20px 0} .hero-bottom{flex-direction:column;align-items:flex-start;padding:36px 0 56px}
-      .hero-strip{margin:0 -20px;height:300px}
+
+      /* ── hero mobile ── */
+      .hero { min-height:100svh; display:flex; flex-direction:column; justify-content:space-between; }
+      .hero-kicker { top:76px; left:20px; }
+      .hero-title {
+        padding: 110px 20px 0;
+        max-width: 100%;
+        font-size: clamp(3.8rem, 14vw, 6rem);
+      }
+      /* hide floating cards + arrows + badge on mobile */
+      .hero-cards, .hero-arrows, .hero-badge { display:none; }
+      /* availability badge — reposition */
+      .avail-badge { margin-top:20px; }
+      .hero-bottom {
+        flex-direction:column; align-items:flex-start;
+        padding:28px 20px 44px; gap:20px;
+      }
+      .hero-desc { font-size:.88rem; }
+      .hero-btns { flex-direction:column; width:100%; gap:8px; }
+      .hero-btns .btn-mag { width:100%; }
+      .hero-btns .btn-mag span { text-align:center; }
+
       .intro,.proc,.contact{padding:80px 20px}
       .svcs,.port{padding-left:20px} .svcs-head,.port-head{padding-right:20px} .svcs-scroll,.port-scroll,.svcs-hint,.port-hint{padding-right:20px}
       .related{padding:80px 20px} .stats-band{padding:60px 20px}
