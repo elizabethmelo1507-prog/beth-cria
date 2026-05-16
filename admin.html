@@ -3400,9 +3400,9 @@ async function generatePropLink(id){
   const fixedProp = Object.assign({}, prop, { blocks: fixLocalhostUrls(prop.blocks) });
   const data = Object.assign({}, fixedProp, { _wpp: cfg.wpp||'' });
   // Persiste versão sanitizada no bc_state também
-  const props = getProposals();
-  const idx = props.findIndex(p=>p.id===id);
-  if(idx>=0){ props[idx] = fixedProp; saveProposals(props); }
+  const allProps = getProposals();
+  const fixIdx = allProps.findIndex(p=>p.id===id);
+  if(fixIdx>=0){ allProps[fixIdx] = fixedProp; saveProposals(allProps); }
   const base = window.location.origin + window.location.pathname.replace('admin.html','');
 
   /* Tenta salvar no Supabase e gerar link curto */
@@ -3426,11 +3426,11 @@ async function generatePropLink(id){
   }
 
   /* Marca como enviada */
-  const props = getProposals();
-  const idx = props.findIndex(p=>p.id===id);
-  if(idx>=0 && props[idx].status==='rascunho'){
-    props[idx].status='enviada';
-    saveProposals(props);
+  const sentProps = getProposals();
+  const sentIdx = sentProps.findIndex(p=>p.id===id);
+  if(sentIdx>=0 && sentProps[sentIdx].status==='rascunho'){
+    sentProps[sentIdx].status='enviada';
+    saveProposals(sentProps);
     renderPropList();
   }
 }
