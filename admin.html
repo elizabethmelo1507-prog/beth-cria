@@ -2190,7 +2190,7 @@
             </div>
             <div class="form-group">
               <label class="form-label">Link alternativo ("Ainda tem dúvidas?")</label>
-              <input class="form-input" type="text" id="pfCtaAlt" placeholder="Ainda tem dúvidas? Fale comigo pelo WhatsApp"/>
+              <input class="form-input" type="text" id="pfCtaAlt" placeholder="Fale conosco pelo WhatsApp"/>
             </div>
 
             <div style="font-size:.8rem;font-weight:700;color:var(--accent);margin:16px 0 10px;text-transform:uppercase;letter-spacing:.08em;">Como funciona? (3 passos)</div>
@@ -3635,11 +3635,28 @@ function renderPropList(){
       <span class="status-badge status-${p.status||'rascunho'}">${statusLabel[p.status]||'Rascunho'}</span>
       <div class="prop-actions">
         <button class="btn btn-primary btn-sm" onclick="generatePropLink('${p.id}')" title="Gerar e copiar link para o cliente">🔗 Link</button>
-        <button class="btn btn-ghost btn-sm" onclick="openPropEditor('${p.id}')">✏️</button>
-        <button class="btn btn-ghost btn-sm" onclick="printProposal('${p.id}')">🖨️</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteProposal('${p.id}')">🗑</button>
+        <button class="btn btn-ghost btn-sm" onclick="openPropEditor('${p.id}')" title="Editar">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="duplicateProposal('${p.id}')" title="Duplicar">📋</button>
+        <button class="btn btn-ghost btn-sm" onclick="printProposal('${p.id}')" title="Imprimir">🖨️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProposal('${p.id}')" title="Remover">🗑</button>
       </div>
     </div>`).join('');
+}
+
+function duplicateProposal(id){
+  const props = getProposals();
+  const orig = props.find(p=>p.id===id);
+  if(!orig) return;
+  const newProp = JSON.parse(JSON.stringify(orig));
+  newProp.id     = genId('prop_');
+  newProp.number = nextPropNumber();
+  newProp.status = 'rascunho';
+  newProp.date   = new Date().toISOString();
+  props.push(newProp);
+  saveProposals(props);
+  renderPropList();
+  toast(`Proposta duplicada como ${newProp.number}!`, 'success');
+  openPropEditor(newProp.id);
 }
 
 function deleteProposal(id){
@@ -3693,7 +3710,7 @@ function openPropEditor(id, prefill){
   document.getElementById('pfCtaTitle').value    = T.ctaTitle    ?? 'Vamos fechar?';
   document.getElementById('pfCtaSub').value      = T.ctaSub      ?? 'Leu tudo e está de acordo com os termos? Confirme o aceite abaixo e eu entro em contato para alinhar cada detalhe com você.';
   document.getElementById('pfCtaBtn').value      = T.ctaBtn      ?? 'Aceitar esta proposta';
-  document.getElementById('pfCtaAlt').value      = T.ctaAlt      ?? 'Ainda tem dúvidas? Fale comigo pelo WhatsApp';
+  document.getElementById('pfCtaAlt').value      = T.ctaAlt      ?? 'Fale conosco pelo WhatsApp';
   document.getElementById('pfStep1Title').value  = T.step1Title  ?? 'Você aceita';
   document.getElementById('pfStep1Desc').value   = T.step1Desc   ?? 'Clique no botão de aceite. Isso confirma seu interesse e me avisa na hora — sem burocracia.';
   document.getElementById('pfStep2Title').value  = T.step2Title  ?? 'Entro em contato';
