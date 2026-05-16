@@ -1441,6 +1441,44 @@
       gap: 8px;
     }
 
+  /* ── rich text editor ── */
+  .rich-editor-wrap {
+    border:1.5px solid rgba(232,237,248,.15); border-radius:10px; overflow:hidden;
+  }
+  .rich-toolbar {
+    display:flex; align-items:center; gap:2px; padding:5px 7px;
+    background:rgba(255,255,255,.04); border-bottom:1px solid rgba(232,237,248,.1);
+    flex-wrap:wrap;
+  }
+  .rich-btn {
+    min-width:28px; height:26px; padding:0 6px; border:none; border-radius:5px;
+    background:transparent; color:rgba(232,237,248,.85);
+    cursor:pointer; font-size:.78rem; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .12s; flex-shrink:0; line-height:1;
+    font-family:inherit;
+  }
+  .rich-btn:hover { background:rgba(255,255,255,.12); }
+  .rich-btn.sep { width:1px; height:14px; background:rgba(232,237,248,.18); margin:0 3px; pointer-events:none; padding:0; min-width:1px; }
+  .rich-editor-content {
+    padding:9px 12px; min-height:72px;
+    font-size:.9rem; line-height:1.6; color:rgba(232,237,248,.9);
+    outline:none; cursor:text; word-break:break-word;
+  }
+  .rich-editor-content:empty::before {
+    content:attr(data-ph); color:rgba(232,237,248,.28); pointer-events:none;
+  }
+  .rich-editor-content font[size="5"] { font-size:1.4em; font-weight:700; }
+  .rich-editor-content font[size="2"] { font-size:0.78em; opacity:0.72; }
+  /* light theme overrides (inside .prop-editor-wrap) */
+  .prop-editor-wrap .rich-editor-wrap { border-color:rgba(40,91,191,.2); }
+  .prop-editor-wrap .rich-toolbar { background:rgba(40,91,191,.05); border-color:rgba(40,91,191,.15); }
+  .prop-editor-wrap .rich-btn { color:#1a2f6e; }
+  .prop-editor-wrap .rich-btn:hover { background:rgba(40,91,191,.1); }
+  .prop-editor-wrap .rich-btn.sep { background:rgba(40,91,191,.2); }
+  .prop-editor-wrap .rich-editor-content { color:#1a2f6e; }
+  .prop-editor-wrap .rich-editor-content:empty::before { color:rgba(40,91,191,.3); }
+
   /* ── media upload widget ── */
   .media-upload-field { display:flex; flex-direction:column; gap:10px; }
   .upload-thumb-wrap {
@@ -2046,7 +2084,8 @@
             <div class="form-section-title" style="margin:20px 0 16px;">✍️ Apresentação</div>
             <div class="form-group">
               <label class="form-label">Texto de abertura</label>
-              <textarea class="form-textarea" id="pfIntro" rows="4" placeholder="Prezado(a) João, é com grande satisfação que apresento esta proposta..."></textarea>
+              <div id="pfIntroWrap"></div>
+              <script>document.getElementById('pfIntroWrap').innerHTML=richEditorHTML('pfIntro','Prezado(a) João, é com grande satisfação que apresento esta proposta...','90px');</script>
             </div>
 
             <div class="form-section-title" style="margin:20px 0 16px;">📦 Itens / Entregáveis</div>
@@ -2074,7 +2113,8 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Forma de pagamento</label>
-                <input class="form-input" type="text" id="pfPayment" placeholder="50% na aprovação, 50% na entrega"/>
+                <div id="pfPaymentWrap"></div>
+                <script>document.getElementById('pfPaymentWrap').innerHTML=richEditorHTML('pfPayment','50% na aprovação, 50% na entrega','56px');</script>
               </div>
             </div>
 
@@ -2206,6 +2246,42 @@ const SB_URL = 'https://uazqpyjhvtaqqzousvtg.supabase.co';
 const SB_KEY = 'sb_publishable_S1IlEcoDvl6p1pEnFuqqYw__nwtUDeU';
 const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
 const SB_BUCKET = 'media';
+
+/* ── rich text editor helpers ── */
+let _richFocus = null; // contenteditable atualmente em foco
+
+/** Executa comando de formatação mantendo o foco no editor */
+window.richCmd = function(cmd, val){
+  if(_richFocus) _richFocus.focus();
+  document.execCommand(cmd, false, val || null);
+  updatePropPreview();
+};
+
+/** Converte texto plano em HTML seguro para contenteditable */
+function toRichHTML(str){
+  if(!str) return '';
+  if(/<[a-z]/i.test(str)) return str; // já é HTML, retorna como está
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+/** HTML de um mini rich editor reutilizável */
+function richEditorHTML(id, placeholder, minH){
+  return `<div class="rich-editor-wrap">
+    <div class="rich-toolbar" role="toolbar" aria-label="Formatação de texto">
+      <button class="rich-btn" onmousedown="event.preventDefault();richCmd('fontSize','5')" title="Texto grande" type="button">A↑</button>
+      <button class="rich-btn" onmousedown="event.preventDefault();richCmd('removeFormat')" title="Tamanho normal" type="button">A</button>
+      <button class="rich-btn" onmousedown="event.preventDefault();richCmd('fontSize','2')" title="Texto pequeno" type="button">A↓</button>
+      <span class="rich-btn sep"></span>
+      <button class="rich-btn" onmousedown="event.preventDefault();richCmd('bold')" title="Negrito" type="button"><b>N</b></button>
+      <button class="rich-btn" onmousedown="event.preventDefault();richCmd('italic')" title="Itálico" type="button"><i>I</i></button>
+    </div>
+    <div class="rich-editor-content" id="${id}" contenteditable="true"
+         data-ph="${placeholder}"
+         style="min-height:${minH||'72px'}"
+         onfocus="_richFocus=this" onblur="_richFocus=this"
+         oninput="updatePropPreview()"></div>
+  </div>`;
+}
 
 /** Faz upload de um File para o Supabase Storage e retorna a URL pública */
 async function uploadToStorage(file, path){
@@ -3485,11 +3561,9 @@ function openPropEditor(id, prefill){
   // default validity = 15 days from today
   const defValid = new Date(); defValid.setDate(defValid.getDate()+15);
   document.getElementById('pfValid').value     = prop ? (prop.validUntil||'') : defValid.toISOString().slice(0,10);
-  document.getElementById('pfIntro').value     = prop ? prop.intro : (prefill ? `Prezado(a) ${prefill.name||'cliente'},
-
-É com grande satisfação que apresento esta proposta para o serviço de ${prefill.service||'criação com IA'}. Coloco minha expertise à disposição para entregar resultados que elevem sua presença no mercado imobiliário.` : '');
+  document.getElementById('pfIntro').innerHTML  = toRichHTML(prop ? prop.intro : (prefill ? `Prezado(a) ${prefill.name||'cliente'},\n\nÉ com grande satisfação que apresento esta proposta para o serviço de ${prefill.service||'criação com IA'}. Coloco minha expertise à disposição para entregar resultados que elevem sua presença no mercado imobiliário.` : ''));
   document.getElementById('pfTotal').value     = prop ? (prop.total||'') : '';
-  document.getElementById('pfPayment').value   = prop ? (prop.payment||'') : '50% na aprovação, 50% na entrega';
+  document.getElementById('pfPayment').innerHTML = toRichHTML(prop ? (prop.payment||'') : '50% na aprovação, 50% na entrega');
   document.getElementById('pfTerms').value     = prop ? (prop.terms||'') : '• Revisões incluídas: até 2 rodadas\n• Material enviado em até 5 dias úteis após aprovação\n• Direitos do material final transferidos integralmente ao cliente';
 
   _propItems = prop ? JSON.parse(JSON.stringify(prop.items||[])) : [];
@@ -3706,7 +3780,9 @@ function buildProposalHTML(p, forPrint){
     .client-block{background:#f0f4ff;border-radius:10px;padding:18px 22px;margin-bottom:4px;}
     .client-name{font-size:1.15rem;font-weight:600;color:#0d1830;}
     .client-role{font-size:.82rem;color:#6b7c99;margin-top:3px;}
-    .intro-text{font-size:.9rem;line-height:1.7;color:#2a3555;white-space:pre-wrap;}
+    .intro-text{font-size:.9rem;line-height:1.7;color:#2a3555;}
+    .intro-text font[size="5"],.payment-text font[size="5"]{font-size:1.4em;font-weight:700;}
+    .intro-text font[size="2"],.payment-text font[size="2"]{font-size:0.78em;opacity:.75;}
     .total-box{background:linear-gradient(135deg,#0d1830,#1a3570);border-radius:10px;padding:22px 28px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
     .total-label{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);}
     .total-value{font-family:'Barlow Condensed',sans-serif;font-size:2rem;font-weight:700;color:#a7de34;}
@@ -3779,10 +3855,10 @@ function updatePropPreview(){
     clientRole: document.getElementById('pfClientRole').value,
     service:    document.getElementById('pfService').value,
     validUntil: document.getElementById('pfValid').value,
-    intro:      document.getElementById('pfIntro').value,
+    intro:      document.getElementById('pfIntro').innerHTML,
     items:      _propItems,
     total:      document.getElementById('pfTotal').value,
-    payment:    document.getElementById('pfPayment').value,
+    payment:    document.getElementById('pfPayment').innerHTML,
     terms:      document.getElementById('pfTerms').value,
   };
   const frame = document.getElementById('propPreview');
@@ -3808,11 +3884,11 @@ function collectPropForm(){
     clientRole: document.getElementById('pfClientRole').value.trim(),
     service:    document.getElementById('pfService').value,
     validUntil: document.getElementById('pfValid').value,
-    intro:      document.getElementById('pfIntro').value.trim(),
+    intro:      document.getElementById('pfIntro').innerHTML,
     items:      _propItems,
     blocks:     JSON.parse(JSON.stringify(_propBlocks)),
     total:      parseFloat(document.getElementById('pfTotal').value)||0,
-    payment:    document.getElementById('pfPayment').value.trim(),
+    payment:    document.getElementById('pfPayment').innerHTML,
     terms:      document.getElementById('pfTerms').value.trim(),
     date:       new Date().toISOString(),
   };

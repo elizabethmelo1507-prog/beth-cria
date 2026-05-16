@@ -448,6 +448,11 @@ a { text-decoration:none; }
   font-size:clamp(1.6rem,4vw,3rem);
   font-weight:800; color:white; line-height:1.1;
 }
+/* tamanhos do rich text editor */
+#paymentVal font[size="5"] { font-size:1.35em; font-weight:900; }
+#paymentVal font[size="2"] { font-size:0.62em; font-weight:600; opacity:.75; }
+.intro-text font[size="5"] { font-size:1.35em; font-weight:700; }
+.intro-text font[size="2"] { font-size:0.82em; opacity:.75; }
 
 .inv-note {
   margin-top:clamp(36px,5vw,56px);
@@ -1683,7 +1688,7 @@ a { text-decoration:none; }
   /* intro */
   if(prop.intro){
     document.getElementById('secIntro').style.display = 'block';
-    document.getElementById('introText').textContent = prop.intro;
+    document.getElementById('introText').innerHTML = prop.intro;
   }
 
   /* items */
@@ -1708,7 +1713,7 @@ a { text-decoration:none; }
   if(prop.total){
     document.getElementById('secTotal').style.display = 'block';
     document.getElementById('totalVal').textContent  = typeof prop.total==='number' ? (fmt(prop.total)||String(prop.total)) : prop.total;
-    document.getElementById('paymentVal').textContent = prop.payment || '—';
+    document.getElementById('paymentVal').innerHTML = prop.payment || '—';
   }
 
   /* info grid */
