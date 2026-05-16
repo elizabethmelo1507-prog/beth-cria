@@ -1441,6 +1441,42 @@
       gap: 8px;
     }
 
+  /* ── media upload widget ── */
+  .media-upload-field { display:flex; flex-direction:column; gap:10px; }
+  .upload-thumb-wrap {
+    width:100%; aspect-ratio:16/9; border-radius:10px; overflow:hidden;
+    background:rgba(40,91,191,.06); border:2px dashed rgba(40,91,191,.22);
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .upload-thumb-wrap.square { aspect-ratio:1; }
+  .upload-thumb-bg {
+    position:absolute; inset:0;
+    background-size:cover; background-position:center;
+  }
+  .upload-thumb-empty {
+    font-size:2rem; opacity:.3; pointer-events:none;
+  }
+  .upload-thumb-wrap video {
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  }
+  .upload-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .upload-btn-label {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:7px 14px; border-radius:8px;
+    background:rgba(40,91,191,.1); color:var(--accent);
+    border:1.5px solid rgba(40,91,191,.25);
+    font-size:.8rem; font-weight:600; cursor:pointer;
+    transition:background .15s;
+  }
+  .upload-btn-label:hover { background:rgba(40,91,191,.2); }
+  .upload-btn-label input[type=file] { display:none; }
+  .upload-btn-label.uploading { opacity:.6; pointer-events:none; }
+  .upload-url-note {
+    font-size:.72rem; color:var(--muted);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    max-width:220px; display:inline-block;
+  }
+
   </style>
 </head>
 <body>
@@ -2169,6 +2205,64 @@ const DEF_PASS = 'bethcria';
 const SB_URL = 'https://uazqpyjhvtaqqzousvtg.supabase.co';
 const SB_KEY = 'sb_publishable_S1IlEcoDvl6p1pEnFuqqYw__nwtUDeU';
 const sbClient = window.supabase.createClient(SB_URL, SB_KEY);
+const SB_BUCKET = 'media';
+
+/** Faz upload de um File para o Supabase Storage e retorna a URL pública */
+async function uploadToStorage(file, path){
+  const { error } = await sbClient.storage
+    .from(SB_BUCKET)
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if(error) throw error;
+  const { data } = sbClient.storage.from(SB_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+/** Chamado pelo input[file] dos blocos de proposta */
+window.uploadBlockMedia = async function(idx, field, input){
+  const file = input.files?.[0];
+  if(!file) return;
+  // marcação visual de loading
+  const label = input.closest('label.upload-btn-label');
+  if(label){ label.classList.add('uploading'); label.textContent = '⏳ Enviando...'; }
+  try {
+    const ext  = file.name.split('.').pop().toLowerCase();
+    const slug = `${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    const path = `proposals/${field}-${slug}.${ext}`;
+    const url  = await uploadToStorage(file, path);
+    _propBlocks[idx][field] = url;
+    // auto-detecta mediaType pelo tipo do arquivo
+    if(field==='url' && _propBlocks[idx].type==='phone-mockup'){
+      _propBlocks[idx].mediaType = file.type.startsWith('video') ? 'video' : 'image';
+    }
+    updatePropPreview();
+    renderPropBlocks();
+    toast('✓ Arquivo enviado!');
+  } catch(e){
+    toast('Erro ao enviar: '+e.message, 'error');
+    renderPropBlocks();
+  }
+};
+
+/** Upload para slot de galeria */
+window.uploadGalleryImg = async function(idx, imgIdx, input){
+  const file = input.files?.[0];
+  if(!file) return;
+  const label = input.closest('label.upload-btn-label');
+  if(label){ label.classList.add('uploading'); label.textContent = '⏳...'; }
+  try {
+    const ext  = file.name.split('.').pop().toLowerCase();
+    const path = `proposals/gallery-${idx}-${imgIdx}-${Date.now()}.${ext}`;
+    const url  = await uploadToStorage(file, path);
+    if(!_propBlocks[idx].images) _propBlocks[idx].images = [];
+    _propBlocks[idx].images[imgIdx] = url;
+    updatePropPreview();
+    renderPropBlocks();
+    toast('✓ Foto adicionada!');
+  } catch(e){
+    toast('Erro: '+e.message, 'error');
+    renderPropBlocks();
+  }
+};
 
 /** Baixa o estado do Supabase e grava no localStorage.
  *  Regra de merge: Supabase só vence se tiver dados reais (não vazio).
@@ -3461,20 +3555,73 @@ function renderBlockFields(b,i){
       </select>
     </div>`;
 
+  // Widget de upload de imagem
+  const imgUpload = (field, label, accept='image/*') => {
+    const url = b[field]||'';
+    const isVideo = url && (url.endsWith('.mp4')||url.endsWith('.mov')||url.endsWith('.webm'));
+    const thumb = url
+      ? (isVideo
+          ? `<video src="${url}" muted playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>`
+          : `<div class="upload-thumb-bg" style="background-image:url('${url.replace(/'/g,"\\'")}')" ></div>`)
+      : `<span class="upload-thumb-empty">${accept.includes('video')?'🎥':'📷'}</span>`;
+    return `<div class="form-group">
+      <label class="form-label">${label}</label>
+      <div class="media-upload-field">
+        <div class="upload-thumb-wrap">${thumb}</div>
+        <div class="upload-row">
+          <label class="upload-btn-label">
+            ${url ? '🔄 Trocar' : (accept.includes('video') ? '🎥 Escolher arquivo' : '📷 Escolher foto')}
+            <input type="file" accept="${accept}" onchange="uploadBlockMedia(${i},'${field}',this)">
+          </label>
+          ${url ? `<span class="upload-url-note" title="${url}">✓ Arquivo salvo</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  };
+
+  // Widget de upload de slot de galeria
+  const galleryUpload = (imgIdx, label) => {
+    const imgs = b.images||[];
+    const url  = imgs[imgIdx]||'';
+    const thumb = url
+      ? `<div class="upload-thumb-bg" style="background-image:url('${url.replace(/'/g,"\\'")}')" ></div>`
+      : `<span class="upload-thumb-empty">📷</span>`;
+    return `<div class="form-group">
+      <label class="form-label">${label}</label>
+      <div class="media-upload-field">
+        <div class="upload-thumb-wrap square">${thumb}</div>
+        <label class="upload-btn-label">
+          ${url ? '🔄 Trocar' : '📷 Escolher foto'}
+          <input type="file" accept="image/*" onchange="uploadGalleryImg(${i},${imgIdx},this)">
+        </label>
+      </div>
+    </div>`;
+  };
+
   switch(b.type){
-    case 'image': return fi('url','URL da imagem *','url','https://seusite.com/imagem.jpg')+fi('caption','Legenda (opcional)','text','Ex: Resultado entregue ao cliente');
-    case 'before-after': return fi('before','URL — ANTES *','url','https://.../antes.jpg')+fi('after','URL — DEPOIS *','url','https://.../depois.jpg')+fi('label','Título','text','Resultado real');
-    case 'phone-mockup': return sel('mediaType','Tipo de conteúdo',[['image','🖼 Imagem'],['video','▶ Vídeo (URL .mp4)'],['embed','📺 Embed (YouTube/Vimeo)']])+fi('url','URL da mídia *','url','https://...')+fi('caption','Legenda (opcional)','text','Ex: Conteúdo de feed');
-    case 'video': return fi('url','URL de embed *','url','https://www.youtube.com/embed/ID')+`<div style="font-size:.72rem;color:var(--muted);margin-top:-6px;margin-bottom:4px;">YouTube: use youtube.com/embed/VIDEO_ID · Vimeo: player.vimeo.com/video/ID</div>`+fi('caption','Legenda (opcional)','text','Ex: Veja um exemplo de resultado');
+    case 'image':
+      return imgUpload('url','Imagem *')+fi('caption','Legenda (opcional)','text','Ex: Resultado entregue ao cliente');
+
+    case 'before-after':
+      return imgUpload('before','Foto ANTES *')
+           + imgUpload('after','Foto DEPOIS *')
+           + fi('label','Título','text','Resultado real');
+
+    case 'phone-mockup':
+      return imgUpload('url','Foto ou Vídeo *','image/*,video/mp4,video/quicktime,video/webm')
+           + fi('caption','Legenda (opcional)','text','Ex: Conteúdo de feed');
+
+    case 'video':
+      return fi('url','URL de embed *','url','https://www.youtube.com/embed/ID')
+           + `<div style="font-size:.72rem;color:var(--muted);margin-top:-6px;margin-bottom:4px;">YouTube: use youtube.com/embed/VIDEO_ID · Vimeo: player.vimeo.com/video/ID</div>`
+           + fi('caption','Legenda (opcional)','text','Ex: Veja um exemplo de resultado');
+
     case 'gallery':
-      const imgs=b.images||['','',''];
-      return [0,1,2,3].map(j=>`
-        <div class="form-group">
-          <label class="form-label">Imagem ${j+1}${j>0?' (opcional)':' *'}</label>
-          <input class="form-input" type="url" placeholder="https://..." value="${(imgs[j]||'').replace(/"/g,'&quot;')}"
-            onchange="setPropBlockImgField(${i},${j},this.value)"/>
-        </div>`).join('');
-    case 'highlight': return ta('text','Texto de destaque *','Ex: Mais de 50 clientes atendidos com resultados reais.')+sel('style','Estilo',[['blue','🔵 Azul'],['lime','🟢 Lima'],['dark','⚫ Escuro']]);
+      return [0,1,2,3].map(j=>galleryUpload(j,`Imagem ${j+1}${j>0?' (opcional)':' *'}`)).join('');
+
+    case 'highlight':
+      return ta('text','Texto de destaque *','Ex: Mais de 50 clientes atendidos com resultados reais.')+sel('style','Estilo',[['blue','🔵 Azul'],['lime','🟢 Lima'],['dark','⚫ Escuro']]);
+
     default: return `<p style="color:var(--muted);font-size:.8rem;">Tipo: ${b.type}</p>`;
   }
 }
