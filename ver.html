@@ -537,45 +537,23 @@ a { text-decoration:none; }
 }
 
 /* ═══════════════════════════════════════════
-   INFO / DETAILS
+   VALIDITY BADGE (dentro do secTotal)
 ═══════════════════════════════════════════ */
-#secInfo .sec-inner > .sec-eyebrow { margin-bottom:12px; }
-#secInfo .sec-inner > .sec-title-sm {
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:clamp(1.8rem,4vw,3rem);
-  font-weight:900; text-transform:uppercase;
-  letter-spacing:-.02em; color:var(--text);
-  margin-bottom:clamp(28px,5vw,48px);
+.inv-validity {
+  display:inline-flex; align-items:center; gap:8px;
+  margin-top:28px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:100px;
+  padding:8px 20px;
+  font-size:.8rem; font-weight:600; letter-spacing:.04em;
+  color:rgba(255,255,255,.65);
 }
-
-.info-grid {
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:16px;
+.inv-validity-icon {
+  font-size:.9rem; opacity:.8;
 }
-.info-card {
-  background:var(--white);
-  border:1.5px solid var(--border);
-  border-radius:16px;
-  padding:clamp(20px,3vw,28px);
-  position:relative; overflow:hidden;
-  transition:transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s;
-}
-.info-card::before {
-  content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
-  background:linear-gradient(90deg,var(--blue),var(--lime));
-  transform:scaleX(0); transform-origin:left;
-  transition:transform .3s var(--ease);
-}
-.info-card:hover { transform:translateY(-3px); box-shadow:0 10px 32px rgba(13,26,48,.08); border-color:rgba(40,91,191,.3); }
-.info-card:hover::before { transform:scaleX(1); }
-
-.info-card-lbl {
-  font-size:.68rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
-  color:var(--muted); margin-bottom:10px;
-}
-.info-card-val {
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:clamp(1.3rem,2.5vw,1.7rem); font-weight:800;
-  color:var(--text); line-height:1.1;
+.inv-validity strong {
+  color:#fff; font-weight:700;
 }
 
 /* ═══════════════════════════════════════════
@@ -1332,6 +1310,10 @@ a { text-decoration:none; }
         <span class="inv-note-icon">✓</span>
         Este investimento inclui tudo o que está descrito acima, sem taxas ocultas ou surpresas.
       </div>
+      <div class="inv-validity" id="invValidity" style="display:none">
+        <span class="inv-validity-icon">⏳</span>
+        Proposta válida até <strong id="invValidDate">—</strong>
+      </div>
     </div>
   </section>
 
@@ -1368,14 +1350,6 @@ a { text-decoration:none; }
   <!-- ══════════════════
        DETALHES
   ══════════════════ -->
-  <section class="sec sec-off reveal" id="secInfo">
-    <div class="sec-inner">
-      <div class="sec-eyebrow">Detalhes do projeto</div>
-      <h2 class="sec-title-sm" style="font-family:'Barlow Condensed',sans-serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:900;text-transform:uppercase;letter-spacing:-.02em;color:var(--text);margin-bottom:clamp(28px,5vw,48px);">Datas &amp;<br>informações</h2>
-      <div class="info-grid" id="infoGrid"></div>
-    </div>
-  </section>
-
   <!-- ══════════════════
        TERMOS
   ══════════════════ -->
@@ -1731,20 +1705,12 @@ a { text-decoration:none; }
     document.getElementById('paymentVal').innerHTML = prop.payment || '—';
   }
 
-  /* info grid */
-  const infoItems = [];
-  if(prop.validity||prop.validUntil) infoItems.push({ l:'Válida até', v: prop.validity || fmtDate(prop.validUntil) });
-  if(prop.start)       infoItems.push({ l:'Início previsto', v: prop.start });
-  if(prop.clientRole)  infoItems.push({ l:'Função / cargo', v: prop.clientRole });
-  if(infoItems.length){
-    document.getElementById('infoGrid').innerHTML = infoItems.map(i=>`
-      <div class="info-card">
-        <div class="info-card-lbl">${i.l}</div>
-        <div class="info-card-val">${i.v}</div>
-      </div>`).join('');
-  } else {
-    const si = document.getElementById('secInfo');
-    if(si) si.style.display = 'none';
+  /* validity badge — aparece dentro da seção de investimento */
+  if(prop.validity || prop.validUntil){
+    const validStr = prop.validity || fmtDate(prop.validUntil);
+    const vEl = document.getElementById('invValidity');
+    const vDateEl = document.getElementById('invValidDate');
+    if(vEl && vDateEl){ vDateEl.textContent = validStr; vEl.style.display = 'inline-flex'; }
   }
 
   /* terms */
