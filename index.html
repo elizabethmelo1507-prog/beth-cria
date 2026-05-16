@@ -322,6 +322,109 @@
     .p-ov-s { font-size:.76rem;color:var(--lime);font-weight:600; }
     .port-hint { padding:14px 48px 0 0;font-size:.67rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);opacity:.4; }
 
+    /* ── RESULTADO REAL ── */
+    .results {
+      background:var(--dark);
+      border-top:1px solid rgba(255,255,255,.08);
+      padding:120px 48px;
+      position:relative;overflow:hidden;
+    }
+    .results::before {
+      content:'';position:absolute;top:-20%;right:-10%;
+      width:55%;height:70%;
+      background:radial-gradient(ellipse,rgba(167,222,52,.06) 0%,transparent 65%);
+      pointer-events:none;
+    }
+    .results-inner { max-width:1200px;margin:0 auto;position:relative;z-index:1; }
+    .results-top { margin-bottom:72px; }
+    .res-kicker { font-size:.6rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:20px;display:flex;align-items:center;gap:10px; }
+    .res-kicker::before { content:'';width:18px;height:1px;background:var(--lime);opacity:.9; }
+    .res-h { font-family:'Barlow Condensed',sans-serif;font-weight:900;font-style:italic;font-size:clamp(3rem,5.5vw,5rem);line-height:.88;text-transform:uppercase;color:#fff; }
+    .res-h .hl { background:var(--lime);color:var(--dark);padding:0 6px; }
+    .res-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:clamp(40px,6vw,80px);
+      align-items:center;
+    }
+
+    /* before/after */
+    .res-ba-wrap { position:relative;border-radius:4px;overflow:hidden;user-select:none;touch-action:none;cursor:ew-resize; }
+    .res-ba-wrap img { display:block;width:100%;height:auto;pointer-events:none; }
+    .res-ba-after { position:absolute;inset:0;overflow:hidden; }
+    .res-ba-after img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover; }
+    .res-ba-handle {
+      position:absolute;top:0;bottom:0;width:2px;background:#fff;
+      transform:translateX(-50%);cursor:ew-resize;z-index:10;
+    }
+    .res-ba-handle::before {
+      content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:40px;height:40px;border-radius:50%;
+      background:var(--lime);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .res-ba-handle::after {
+      content:'◀ ▶';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      font-size:.55rem;color:var(--dark);font-weight:900;letter-spacing:-.05em;white-space:nowrap;
+      z-index:1;
+    }
+    .res-ba-label {
+      position:absolute;bottom:16px;
+      font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.72rem;
+      letter-spacing:.14em;text-transform:uppercase;padding:5px 12px;
+      border-radius:2px;z-index:5;
+    }
+    .res-ba-label.before { left:16px;background:rgba(0,0,0,.55);color:#fff; }
+    .res-ba-label.after  { right:16px;background:var(--lime);color:var(--dark); }
+    .res-ba-hint {
+      margin-top:14px;text-align:center;
+      font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+      color:rgba(255,255,255,.28);
+    }
+
+    /* phone mockup */
+    .res-mockup-col { display:flex;flex-direction:column;align-items:center;gap:24px; }
+    .res-mockup-label {
+      align-self:flex-start;
+      font-size:.6rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+      color:rgba(255,255,255,.35);display:flex;align-items:center;gap:10px;
+    }
+    .res-mockup-label::before { content:'';width:18px;height:1px;background:rgba(255,255,255,.2); }
+    .res-phone {
+      position:relative;width:min(280px,80%);
+      background:#0a0a0a;
+      border-radius:44px;
+      padding:14px 10px;
+      box-shadow:0 0 0 1.5px rgba(255,255,255,.1), 0 40px 80px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+    .res-phone::before {
+      content:'';display:block;width:80px;height:6px;
+      border-radius:100px;background:rgba(255,255,255,.12);
+      margin:0 auto 12px;
+    }
+    .res-phone-screen {
+      border-radius:34px;overflow:hidden;
+      background:#000;aspect-ratio:9/16;
+      position:relative;
+    }
+    .res-phone-screen video {
+      width:100%;height:100%;object-fit:cover;display:block;
+    }
+    .res-phone::after {
+      content:'';display:block;width:48px;height:5px;
+      border-radius:100px;background:rgba(255,255,255,.12);
+      margin:12px auto 0;
+    }
+    .res-desc { font-size:.9rem;color:rgba(255,255,255,.5);line-height:1.78;max-width:340px;text-align:center; }
+    .res-desc strong { color:var(--lime); }
+
+    @media(max-width:860px){
+      .results { padding:80px 24px; }
+      .res-grid { grid-template-columns:1fr;gap:56px; }
+      .res-mockup-col { align-items:center; }
+      .res-mockup-label { align-self:center; }
+    }
+
     /* ── PROCESS ── */
     .proc { padding:120px 48px;background:var(--bg);border-top:1px solid var(--bdr); }
     .proc-inner { max-width:1000px;margin:0 auto; }
@@ -991,6 +1094,45 @@
     <div class="port-hint">← drag →</div>
   </section>
 
+  <!-- RESULTADO REAL -->
+  <section class="results" id="resultado">
+    <div class="results-inner">
+      <div class="results-top">
+        <div class="res-kicker">Resultado real</div>
+        <h2 class="res-h">ANTES &amp;<br><span class="hl">DEPOIS.</span></h2>
+      </div>
+      <div class="res-grid">
+
+        <!-- Before/After slider -->
+        <div>
+          <div class="res-ba-wrap" id="rBaWrap">
+            <img src="https://elizabethmelo1507-prog.github.io/beth-cria/foto-antes.jpg" alt="Antes"/>
+            <div class="res-ba-after" id="rBaAfter">
+              <img src="https://elizabethmelo1507-prog.github.io/beth-cria/foto-depois.jpg" alt="Depois"/>
+            </div>
+            <div class="res-ba-handle" id="rBaHandle" style="left:50%"></div>
+            <span class="res-ba-label before">Antes</span>
+            <span class="res-ba-label after">Depois</span>
+          </div>
+          <div class="res-ba-hint">← arraste para comparar →</div>
+        </div>
+
+        <!-- Phone mockup + tour 360 -->
+        <div class="res-mockup-col">
+          <div class="res-mockup-label">Tour 360° interativo</div>
+          <div class="res-phone">
+            <div class="res-phone-screen">
+              <video src="https://elizabethmelo1507-prog.github.io/beth-cria/tour-virtual-demo-sd.mp4"
+                     autoplay muted loop playsinline></video>
+            </div>
+          </div>
+          <p class="res-desc">O cliente visita o imóvel pelo celular, <strong>sem sair de casa</strong>. Mais interesse, mais conversões.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- PROCESS -->
   <section class="proc">
     <div class="proc-inner">
@@ -1122,6 +1264,29 @@
 
 
   <script>
+  /* ── BEFORE/AFTER SLIDER ─────────────────── */
+  (function(){
+    const wrap   = document.getElementById('rBaWrap');
+    const after  = document.getElementById('rBaAfter');
+    const handle = document.getElementById('rBaHandle');
+    if(!wrap) return;
+    let dragging = false;
+    function setPos(x){
+      const r = wrap.getBoundingClientRect();
+      const pct = Math.min(Math.max((x - r.left) / r.width, 0.03), 0.97);
+      handle.style.left = (pct*100)+'%';
+      after.style.clipPath = `inset(0 0 0 ${pct*100}%)`;
+    }
+    // init
+    after.style.clipPath = 'inset(0 0 0 50%)';
+    wrap.addEventListener('mousedown', e=>{ dragging=true; setPos(e.clientX); e.preventDefault(); });
+    window.addEventListener('mousemove', e=>{ if(dragging) setPos(e.clientX); });
+    window.addEventListener('mouseup', ()=>{ dragging=false; });
+    wrap.addEventListener('touchstart', e=>{ dragging=true; setPos(e.touches[0].clientX); e.preventDefault(); },{passive:false});
+    window.addEventListener('touchmove', e=>{ if(dragging) setPos(e.touches[0].clientX); },{passive:true});
+    window.addEventListener('touchend', ()=>{ dragging=false; });
+  })();
+
   /* ── CONFIG GLOBAL (admin) ─────────────────── */
   let _WPP = 'SEU_NUMERO';
 
