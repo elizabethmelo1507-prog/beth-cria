@@ -3271,11 +3271,44 @@ function wireContracts(){
   document.getElementById('contractSaveBtn').addEventListener('click', saveContract);
 }
 
+/** Substitui URLs localhost por equivalentes públicas no GitHub Pages.
+ *  Chamada antes de qualquer save para bc_docs. */
+function fixLocalhostUrls(blocks){
+  const GH = 'https://elizabethmelo1507-prog.github.io/beth-cria';
+  const FILE_MAP = {
+    'foto antes.png':  'foto-antes.jpg',
+    'foto depois.png': 'foto-depois.jpg',
+    'foto-antes.jpg':  'foto-antes.jpg',
+    'foto-depois.jpg': 'foto-depois.jpg',
+  };
+  function fix(url){
+    if(!url) return url;
+    if(!url.includes('localhost') && !url.includes('127.0.0.1')) return url;
+    const raw = decodeURIComponent(url.split('/').pop());
+    if(FILE_MAP[raw]) return `${GH}/${FILE_MAP[raw]}`;
+    if(/\.(mov|mp4)$/i.test(raw)) return `${GH}/tour-virtual-demo-sd.mp4`;
+    return url;
+  }
+  return (blocks||[]).map(b=>{
+    b = Object.assign({}, b);
+    if(b.before) b.before = fix(b.before);
+    if(b.after)  b.after  = fix(b.after);
+    if(b.url)    b.url    = fix(b.url);
+    return b;
+  });
+}
+
 async function generatePropLink(id){
   const prop = getProposals().find(p=>p.id===id);
   if(!prop){ toast('Proposta não encontrada.','error'); return; }
   const cfg = loadCfg();
-  const data = Object.assign({}, prop, { _wpp: cfg.wpp||'' });
+  // Sanitiza URLs de localhost antes de salvar
+  const fixedProp = Object.assign({}, prop, { blocks: fixLocalhostUrls(prop.blocks) });
+  const data = Object.assign({}, fixedProp, { _wpp: cfg.wpp||'' });
+  // Persiste versão sanitizada no bc_state também
+  const props = getProposals();
+  const idx = props.findIndex(p=>p.id===id);
+  if(idx>=0){ props[idx] = fixedProp; saveProposals(props); }
   const base = window.location.origin + window.location.pathname.replace('admin.html','');
 
   /* Tenta salvar no Supabase e gerar link curto */
@@ -3648,8 +3681,10 @@ function wirePropostas(){
   });
 
   document.getElementById('propSaveBtn').addEventListener('click',()=>{
-    const p = collectPropForm();
-    if(!p.client){ toast('Preencha o nome do cliente.','error'); return; }
+    const raw = collectPropForm();
+    if(!raw.client){ toast('Preencha o nome do cliente.','error'); return; }
+    // Auto-corrige URLs localhost antes de salvar
+    const p = Object.assign({}, raw, { blocks: fixLocalhostUrls(raw.blocks) });
     const props = getProposals();
     if(_propEditId){ const idx=props.findIndex(x=>x.id===_propEditId); if(idx>=0) props[idx]=p; else props.unshift(p); }
     else props.unshift(p);
