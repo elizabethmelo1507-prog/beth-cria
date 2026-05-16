@@ -930,6 +930,47 @@ a { text-decoration:none; }
 #secBlocks { background:var(--white); border-top:1px solid var(--border); }
 .blocks-wrap { display:flex; flex-direction:column; gap:clamp(48px,8vw,96px); }
 
+/* ── divisor entre blocos ── */
+.blk-divider {
+  display:flex; align-items:center; gap:16px;
+  margin:calc(clamp(48px,8vw,96px) * -.35) 0; /* sobe um pouco para não duplicar gap */
+  pointer-events:none;
+}
+.blk-divider-line {
+  flex:1; height:1.5px;
+  background:linear-gradient(90deg,transparent,rgba(40,91,191,.22),transparent);
+}
+.blk-divider-chip {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:.72rem; font-weight:700; letter-spacing:.18em;
+  text-transform:uppercase; white-space:nowrap;
+  color:var(--blue);
+  background:rgba(40,91,191,.07);
+  border:1.5px solid rgba(40,91,191,.18);
+  border-radius:100px;
+  padding:5px 18px;
+}
+
+/* ── phone mockup: seção em destaque (dark card) ── */
+.blk-mockup-featured {
+  background:linear-gradient(135deg,#0d1830 0%,#192f6a 100%);
+  border-radius:28px;
+  padding:clamp(36px,6vw,64px) clamp(24px,5vw,48px);
+  box-shadow:0 20px 60px rgba(13,26,48,.18);
+  position:relative; overflow:hidden;
+}
+.blk-mockup-featured::before {
+  content:'';
+  position:absolute; inset:0;
+  background:radial-gradient(ellipse at 70% 50%,rgba(167,222,52,.08) 0%,transparent 65%);
+  pointer-events:none;
+}
+.blk-mockup-featured .blk-mockup-caption strong { color:#fff; }
+.blk-mockup-featured .blk-mockup-caption span   { color:rgba(255,255,255,.55); }
+.blk-mockup-featured .phone-glow {
+  background:radial-gradient(ellipse,rgba(167,222,52,.25) 0%,transparent 65%);
+}
+
 /* ── image block ── */
 .blk-image { }
 .blk-image img {
@@ -1505,7 +1546,38 @@ a { text-decoration:none; }
       return true;
     });
     if(!valid.length) return;
-    wrap.innerHTML = valid.map(renderBlock).join('');
+
+    // Labels contextuais por transição de tipo
+    const dividerLabel = (prev, cur) => {
+      if(prev==='before-after' && cur==='phone-mockup') return 'Veja o tour em funcionamento';
+      if(prev==='highlight'    && cur==='before-after') return 'Resultado real';
+      if(prev==='highlight'    && cur==='phone-mockup') return 'Veja na prática';
+      if(prev==='before-after' && cur==='gallery')      return 'Galeria completa';
+      if(cur ==='phone-mockup')                         return 'Tour virtual ao vivo';
+      return null;
+    };
+
+    const pieces = [];
+    valid.forEach((b, idx) => {
+      // insere divisor se houver label
+      if(idx > 0){
+        const label = dividerLabel(valid[idx-1].type, b.type);
+        if(label){
+          pieces.push(`<div class="blk-divider">
+            <div class="blk-divider-line"></div>
+            <span class="blk-divider-chip">${label}</span>
+            <div class="blk-divider-line"></div>
+          </div>`);
+        }
+      }
+      // phone-mockup ganha card escuro
+      const html = renderBlock(b);
+      pieces.push(b.type === 'phone-mockup'
+        ? `<div class="blk-mockup-featured">${html}</div>`
+        : html);
+    });
+
+    wrap.innerHTML = pieces.join('');
     sec.style.display = 'block';
     // init before/after sliders
     sec.querySelectorAll('[data-ba]').forEach(initBA);
