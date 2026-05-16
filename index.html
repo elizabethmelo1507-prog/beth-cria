@@ -324,105 +324,119 @@
 
     /* ── RESULTADO REAL ── */
     .results {
-      background:var(--dark);
-      border-top:1px solid rgba(255,255,255,.08);
+      background:var(--bg);
+      border-top:1px solid var(--bdr);
       padding:120px 48px;
       position:relative;overflow:hidden;
     }
-    .results::before {
-      content:'';position:absolute;top:-20%;right:-10%;
-      width:55%;height:70%;
-      background:radial-gradient(ellipse,rgba(167,222,52,.06) 0%,transparent 65%);
-      pointer-events:none;
-    }
     .results-inner { max-width:1200px;margin:0 auto;position:relative;z-index:1; }
-    .results-top { margin-bottom:72px; }
-    .res-kicker { font-size:.6rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:20px;display:flex;align-items:center;gap:10px; }
-    .res-kicker::before { content:'';width:18px;height:1px;background:var(--lime);opacity:.9; }
-    .res-h { font-family:'Barlow Condensed',sans-serif;font-weight:900;font-style:italic;font-size:clamp(3rem,5.5vw,5rem);line-height:.88;text-transform:uppercase;color:#fff; }
-    .res-h .hl { background:var(--lime);color:var(--dark);padding:0 6px; }
-    .res-grid {
+    .results-head {
+      display:flex;align-items:flex-end;justify-content:space-between;
+      margin-bottom:64px;gap:40px;
+    }
+    .res-kicker { font-size:.6rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:10px; }
+    .res-kicker::before { content:'';width:18px;height:1px;background:var(--dark);opacity:.3; }
+    .res-h { font-family:'Barlow Condensed',sans-serif;font-weight:900;font-style:italic;font-size:clamp(3rem,5.5vw,5rem);line-height:.88;text-transform:uppercase;color:var(--dark); }
+    .res-h .hl { background:var(--lime);padding:0 6px; }
+    .res-sub { max-width:300px;font-size:.88rem;color:var(--muted);line-height:1.8;font-style:italic; }
+
+    /* two-card grid */
+    .res-cards {
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:clamp(40px,6vw,80px);
-      align-items:center;
+      gap:3px;
     }
+    .res-card {
+      background:#fff;
+      border:1px solid var(--bdr);
+      overflow:hidden;
+      position:relative;
+    }
+    .res-card-tag {
+      position:absolute;top:20px;left:20px;z-index:6;
+      font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.65rem;
+      letter-spacing:.16em;text-transform:uppercase;
+      background:var(--dark);color:#fff;
+      padding:5px 12px;
+    }
+    .res-card-tag.lime { background:var(--lime);color:var(--dark); }
 
-    /* before/after */
-    .res-ba-wrap { position:relative;border-radius:4px;overflow:hidden;user-select:none;touch-action:none;cursor:ew-resize; }
-    .res-ba-wrap img { display:block;width:100%;height:auto;pointer-events:none; }
+    /* before/after card */
+    .res-ba-wrap {
+      position:relative;overflow:hidden;
+      user-select:none;touch-action:none;cursor:ew-resize;
+      aspect-ratio:4/3;
+    }
+    .res-ba-wrap img {
+      position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;display:block;
+    }
     .res-ba-after { position:absolute;inset:0;overflow:hidden; }
     .res-ba-after img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover; }
     .res-ba-handle {
-      position:absolute;top:0;bottom:0;width:2px;background:#fff;
+      position:absolute;top:0;bottom:0;width:3px;
+      background:#fff;
       transform:translateX(-50%);cursor:ew-resize;z-index:10;
+      box-shadow:0 0 12px rgba(0,0,0,.3);
     }
-    .res-ba-handle::before {
-      content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-      width:40px;height:40px;border-radius:50%;
+    .res-ba-btn {
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:44px;height:44px;border-radius:50%;
       background:var(--lime);
       display:flex;align-items:center;justify-content:center;
+      font-size:.6rem;font-weight:900;color:var(--dark);letter-spacing:-.05em;
+      box-shadow:0 4px 16px rgba(0,0,0,.25);
+      pointer-events:none;
     }
-    .res-ba-handle::after {
-      content:'◀ ▶';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-      font-size:.55rem;color:var(--dark);font-weight:900;letter-spacing:-.05em;white-space:nowrap;
-      z-index:1;
+    .res-ba-pills {
+      position:absolute;bottom:16px;left:0;right:0;
+      display:flex;justify-content:space-between;padding:0 16px;z-index:5;
+      pointer-events:none;
     }
-    .res-ba-label {
-      position:absolute;bottom:16px;
-      font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.72rem;
-      letter-spacing:.14em;text-transform:uppercase;padding:5px 12px;
-      border-radius:2px;z-index:5;
+    .res-ba-pill {
+      font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.68rem;
+      letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;
     }
-    .res-ba-label.before { left:16px;background:rgba(0,0,0,.55);color:#fff; }
-    .res-ba-label.after  { right:16px;background:var(--lime);color:var(--dark); }
-    .res-ba-hint {
-      margin-top:14px;text-align:center;
-      font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
-      color:rgba(255,255,255,.28);
+    .res-ba-pill.b { background:rgba(0,0,0,.6);color:#fff; }
+    .res-ba-pill.a { background:var(--lime);color:var(--dark); }
+    .res-card-footer {
+      padding:20px 24px;border-top:1px solid var(--bdr);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      background:#fff;
     }
+    .res-footer-label {
+      font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;
+      letter-spacing:.06em;text-transform:uppercase;color:var(--dark);
+    }
+    .res-footer-hint {
+      font-size:.7rem;color:var(--muted);display:flex;align-items:center;gap:6px;
+    }
+    .res-footer-hint::before { content:'↔';opacity:.4; }
 
-    /* phone mockup */
-    .res-mockup-col { display:flex;flex-direction:column;align-items:center;gap:24px; }
-    .res-mockup-label {
-      align-self:flex-start;
-      font-size:.6rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
-      color:rgba(255,255,255,.35);display:flex;align-items:center;gap:10px;
+    /* tour video card */
+    .res-video-wrap {
+      aspect-ratio:4/3;
+      position:relative;overflow:hidden;background:#0d1a30;
     }
-    .res-mockup-label::before { content:'';width:18px;height:1px;background:rgba(255,255,255,.2); }
-    .res-phone {
-      position:relative;width:min(280px,80%);
-      background:#0a0a0a;
-      border-radius:44px;
-      padding:14px 10px;
-      box-shadow:0 0 0 1.5px rgba(255,255,255,.1), 0 40px 80px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.04);
-    }
-    .res-phone::before {
-      content:'';display:block;width:80px;height:6px;
-      border-radius:100px;background:rgba(255,255,255,.12);
-      margin:0 auto 12px;
-    }
-    .res-phone-screen {
-      border-radius:34px;overflow:hidden;
-      background:#000;aspect-ratio:9/16;
-      position:relative;
-    }
-    .res-phone-screen video {
+    .res-video-wrap video {
       width:100%;height:100%;object-fit:cover;display:block;
+      opacity:.92;
     }
-    .res-phone::after {
-      content:'';display:block;width:48px;height:5px;
-      border-radius:100px;background:rgba(255,255,255,.12);
-      margin:12px auto 0;
+    .res-video-badge {
+      position:absolute;top:20px;right:20px;z-index:6;
+      display:flex;align-items:center;gap:8px;
+      background:rgba(0,0,0,.55);backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,.15);
+      padding:8px 14px;
     }
-    .res-desc { font-size:.9rem;color:rgba(255,255,255,.5);line-height:1.78;max-width:340px;text-align:center; }
-    .res-desc strong { color:var(--lime); }
+    .res-video-dot { width:8px;height:8px;border-radius:50%;background:var(--lime);animation:pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+    .res-video-badge-txt { font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#fff; }
 
-    @media(max-width:860px){
+    @media(max-width:768px){
       .results { padding:80px 24px; }
-      .res-grid { grid-template-columns:1fr;gap:56px; }
-      .res-mockup-col { align-items:center; }
-      .res-mockup-label { align-self:center; }
+      .results-head { flex-direction:column;align-items:flex-start;gap:16px; }
+      .res-sub { max-width:100%; }
+      .res-cards { grid-template-columns:1fr; }
     }
 
     /* ── PROCESS ── */
@@ -1097,36 +1111,53 @@
   <!-- RESULTADO REAL -->
   <section class="results" id="resultado">
     <div class="results-inner">
-      <div class="results-top">
-        <div class="res-kicker">Resultado real</div>
-        <h2 class="res-h">ANTES &amp;<br><span class="hl">DEPOIS.</span></h2>
-      </div>
-      <div class="res-grid">
-
-        <!-- Before/After slider -->
+      <div class="results-head">
         <div>
+          <div class="res-kicker">O que você recebe</div>
+          <h2 class="res-h">RESULTADO<br><span class="hl">REAL.</span></h2>
+        </div>
+        <p class="res-sub">Imagens tratadas com IA e tour virtual interativo — o imóvel apresentado no seu melhor estado.</p>
+      </div>
+
+      <div class="res-cards">
+
+        <!-- Card 1: Before/After -->
+        <div class="res-card">
+          <div class="res-card-tag">Renderização com IA</div>
           <div class="res-ba-wrap" id="rBaWrap">
             <img src="https://elizabethmelo1507-prog.github.io/beth-cria/foto-antes.jpg" alt="Antes"/>
             <div class="res-ba-after" id="rBaAfter">
               <img src="https://elizabethmelo1507-prog.github.io/beth-cria/foto-depois.jpg" alt="Depois"/>
             </div>
-            <div class="res-ba-handle" id="rBaHandle" style="left:50%"></div>
-            <span class="res-ba-label before">Antes</span>
-            <span class="res-ba-label after">Depois</span>
-          </div>
-          <div class="res-ba-hint">← arraste para comparar →</div>
-        </div>
-
-        <!-- Phone mockup + tour 360 -->
-        <div class="res-mockup-col">
-          <div class="res-mockup-label">Tour 360° interativo</div>
-          <div class="res-phone">
-            <div class="res-phone-screen">
-              <video src="https://elizabethmelo1507-prog.github.io/beth-cria/tour-virtual-demo-sd.mp4"
-                     autoplay muted loop playsinline></video>
+            <div class="res-ba-handle" id="rBaHandle" style="left:50%">
+              <div class="res-ba-btn">◀▶</div>
+            </div>
+            <div class="res-ba-pills">
+              <span class="res-ba-pill b">Antes</span>
+              <span class="res-ba-pill a">Depois</span>
             </div>
           </div>
-          <p class="res-desc">O cliente visita o imóvel pelo celular, <strong>sem sair de casa</strong>. Mais interesse, mais conversões.</p>
+          <div class="res-card-footer">
+            <span class="res-footer-label">Ambiente real → virtualizado</span>
+            <span class="res-footer-hint">arraste para comparar</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Tour 360 -->
+        <div class="res-card">
+          <div class="res-card-tag lime">Tour 360° Interativo</div>
+          <div class="res-video-wrap">
+            <video src="https://elizabethmelo1507-prog.github.io/beth-cria/tour-virtual-demo-sd.mp4"
+                   autoplay muted loop playsinline></video>
+            <div class="res-video-badge">
+              <div class="res-video-dot"></div>
+              <span class="res-video-badge-txt">Ao vivo</span>
+            </div>
+          </div>
+          <div class="res-card-footer">
+            <span class="res-footer-label">Visita virtual — sem sair de casa</span>
+            <span class="res-footer-hint" style="font-size:.7rem;color:var(--muted);">360° · navegação livre</span>
+          </div>
         </div>
 
       </div>
