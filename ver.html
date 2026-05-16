@@ -991,20 +991,23 @@ a { text-decoration:none; }
 /* ── before / after block ── */
 .blk-ba { }
 .ba-label-row {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:18px;
+  display:flex; flex-direction:column; align-items:center;
+  gap:10px; margin-bottom:22px; text-align:center;
 }
 .ba-title {
   font-family:'Barlow Condensed',sans-serif;
-  font-size:1.5rem; font-weight:800; text-transform:uppercase;
+  font-size:clamp(1.4rem,4vw,2rem); font-weight:800; text-transform:uppercase;
   letter-spacing:-.01em; color:var(--text);
+  text-align:center;
 }
 .ba-hint {
   font-size:.78rem; color:var(--muted);
-  display:flex; align-items:center; gap:6px;
+  display:inline-flex; align-items:center; gap:8px;
+  background:rgba(40,91,191,.07); border:1px solid rgba(40,91,191,.18);
+  border-radius:100px; padding:5px 16px;
 }
-.ba-hint::before { content:'←'; font-size:1rem; }
-.ba-hint::after  { content:'→'; font-size:1rem; }
+.ba-hint::before { content:'←'; font-size:.9rem; }
+.ba-hint::after  { content:'→'; font-size:.9rem; }
 
 .ba-wrap {
   position:relative; overflow:hidden;
@@ -1013,6 +1016,9 @@ a { text-decoration:none; }
   box-shadow:0 8px 40px rgba(13,26,48,.15);
   aspect-ratio:16/9;
   background:#dce4f5;
+  /* estica além do container em telas maiores */
+  margin-left:clamp(-48px,-5vw,0px);
+  margin-right:clamp(-48px,-5vw,0px);
 }
 .ba-before, .ba-after {
   position:absolute; inset:0;
