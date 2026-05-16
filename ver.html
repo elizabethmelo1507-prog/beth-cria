@@ -1373,7 +1373,7 @@ a { text-decoration:none; }
   <section class="sec sec-white reveal" id="secTerms" style="display:none">
     <div class="sec-inner">
       <div class="sec-eyebrow">Termos &amp; condições</div>
-      <h2 class="sec-title" id="termsTitle">O que<br>combinamos</h2>
+      <h2 class="sec-title" id="termsTitle">Sobre o<br>contrato</h2>
       <p class="terms-intro" id="termsIntro">Por favor, leia com atenção os termos abaixo antes de aceitar esta proposta.</p>
       <ul class="terms-list" id="termsList"></ul>
     </div>
@@ -1742,11 +1742,13 @@ a { text-decoration:none; }
   if(prop.terms){
     const lines = Array.isArray(prop.terms)
       ? prop.terms.filter(Boolean)
-      : prop.terms.split(/<br\s*\/?>|\n/i).map(t=>t.replace(/<[^>]+>/g,'').trim()).filter(Boolean);
+      : prop.terms
+          .split(/<br\s*\/?>|<\/div>|<\/p>|\n/i)
+          .map(t=>t.replace(/<[^>]+>/g,'').trim().replace(/^[•·\-–]\s*/,''))
+          .filter(Boolean);
     if(lines.length){
       document.getElementById('secTerms').style.display = 'block';
-      document.getElementById('termsList').innerHTML = lines.map(t=>`
-        <li>${String(t).replace(/^[•·\-–]\s*/,'')}</li>`).join('');
+      document.getElementById('termsList').innerHTML = lines.map(t=>`<li>${t}</li>`).join('');
     }
   }
 
@@ -1760,7 +1762,7 @@ a { text-decoration:none; }
     /* preserve line-breaks as <br> in HTML elements */
     el.innerHTML = esc(src).replace(/\n/g,'<br>');
   };
-  setText('termsTitle',  prop.termsTitle,  'O que\ncombinamos');
+  setText('termsTitle',  prop.termsTitle,  'Sobre o\ncontrato');
   setText('termsIntro',  prop.termsIntro,  'Por favor, leia com atenção os termos abaixo antes de aceitar esta proposta.');
   setText('ctaTitle',    prop.ctaTitle,    'Vamos\nfechar?');
   setText('ctaSub',      prop.ctaSub,      'Leu tudo e está de acordo com os termos? Confirme abaixo para formalizar o início do trabalho.');

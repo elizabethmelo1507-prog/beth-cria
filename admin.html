@@ -2151,23 +2151,10 @@
             <!-- 📌 Termos -->
             <div class="form-section-title" style="margin:24px 0 14px;">📌 Termos e condições</div>
             <div class="form-group">
-              <label class="form-label">Condições da proposta</label>
-              <div class="rich-editor-wrap">
-                <div class="rich-toolbar">
-                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('fontSize','5')" title="Texto grande" type="button">A↑</button>
-                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('removeFormat')" title="Normal" type="button">A</button>
-                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('fontSize','2')" title="Texto pequeno" type="button">A↓</button>
-                  <span class="rich-btn sep"></span>
-                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('bold')" title="Negrito" type="button"><b>N</b></button>
-                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('italic')" title="Itálico" type="button"><i>I</i></button>
-                </div>
-                <div class="rich-editor-content" id="pfTerms" contenteditable="true"
-                     data-ph="• Revisões incluídas: até 2 rodadas&#10;• Prazo de entrega após aprovação&#10;• Direitos transferidos ao cliente"
-                     style="min-height:130px"
-                     onfocus="_richFocus=this" onblur="_richFocus=this"
-                     oninput="updatePropPreview()"></div>
-              </div>
-              <div style="font-size:.72rem;color:var(--muted);margin-top:6px;">Use Enter para cada item. Vira lista automática na proposta.</div>
+              <label class="form-label">Tópicos do contrato <span style="font-weight:400;color:var(--muted)">(uma linha = um tópico numerado)</span></label>
+              <textarea class="form-textarea" id="pfTerms" rows="6" oninput="updatePropPreview()"
+                placeholder="Revisões incluídas: até 2 rodadas&#10;Material enviado em até 5 dias úteis após aprovação&#10;Direitos do material final transferidos integralmente ao cliente&#10;Cancelamento com aviso mínimo de 48h"></textarea>
+              <div style="font-size:.72rem;color:var(--muted);margin-top:6px;">Cada linha vira um tópico 01, 02, 03… numerado na proposta.</div>
             </div>
 
             <!-- 📝 Textos personalizáveis -->
@@ -3683,12 +3670,25 @@ function openPropEditor(id, prefill){
   document.getElementById('pfIntro').innerHTML  = toRichHTML(prop ? prop.intro : (prefill ? `Prezado(a) ${prefill.name||'cliente'},\n\nÉ com grande satisfação que apresento esta proposta para o serviço de ${prefill.service||'criação com IA'}. Coloco minha expertise à disposição para entregar resultados que elevem sua presença no mercado imobiliário.` : ''));
   document.getElementById('pfTotal').value     = prop ? (prop.total||'') : '';
   document.getElementById('pfPayment').innerHTML = toRichHTML(prop ? (prop.payment||'') : '50% na aprovação, 50% na entrega');
-  document.getElementById('pfTerms').innerHTML  = toRichHTML(prop ? (prop.terms||'') : '• Revisões incluídas: até 2 rodadas\n• Material enviado em até 5 dias úteis após aprovação\n• Direitos do material final transferidos integralmente ao cliente');
+  /* termsToLines: converte HTML/array/string para linhas de texto puro */
+  (function(){
+    const raw = prop ? (prop.terms||'') : '';
+    let lines;
+    if(Array.isArray(raw)){
+      lines = raw.filter(Boolean);
+    } else {
+      lines = raw.split(/<br\s*\/?>|<\/div>|<\/p>|\n/i)
+                 .map(t=>t.replace(/<[^>]+>/g,'').trim().replace(/^[•·\-–]\s*/,''))
+                 .filter(Boolean);
+    }
+    const defaultTerms = 'Revisões incluídas: até 2 rodadas\nMaterial enviado em até 5 dias úteis após aprovação\nDireitos do material final transferidos integralmente ao cliente';
+    document.getElementById('pfTerms').value = lines.length ? lines.join('\n') : defaultTerms;
+  })();
 
   // textos personalizáveis
   const T = prop || {};
   const v = (id, def) => { const el = document.getElementById(id); if(el) el.value = T[id.replace('pf','')] !== undefined ? (T[id.replace('pf','')] || def) : def; };
-  document.getElementById('pfTermsTitle').value  = T.termsTitle  ?? 'O que combinamos';
+  document.getElementById('pfTermsTitle').value  = T.termsTitle  ?? 'Sobre o contrato';
   document.getElementById('pfTermsIntro').value  = T.termsIntro  ?? 'Por favor, leia com atenção os termos abaixo antes de aceitar esta proposta.';
   document.getElementById('pfCtaTitle').value    = T.ctaTitle    ?? 'Vamos fechar?';
   document.getElementById('pfCtaSub').value      = T.ctaSub      ?? 'Leu tudo e está de acordo com os termos? Confirme o aceite abaixo e eu entro em contato para alinhar cada detalhe com você.';
@@ -3997,7 +3997,7 @@ function updatePropPreview(){
     items:      _propItems,
     total:      document.getElementById('pfTotal').value,
     payment:    document.getElementById('pfPayment').innerHTML,
-    terms:      document.getElementById('pfTerms').innerHTML,
+    terms:      document.getElementById('pfTerms').value,
   };
   const frame = document.getElementById('propPreview');
   frame.innerHTML = buildProposalHTML(p, false);
@@ -4028,7 +4028,7 @@ function collectPropForm(){
     blocks:     JSON.parse(JSON.stringify(_propBlocks)),
     total:      parseFloat(gv('pfTotal'))||0,
     payment:    document.getElementById('pfPayment').innerHTML,
-    terms:      document.getElementById('pfTerms').innerHTML,
+    terms:      document.getElementById('pfTerms').value,
     date:       new Date().toISOString(),
     // textos personalizáveis
     termsTitle:     gv('pfTermsTitle'),
