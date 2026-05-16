@@ -1742,7 +1742,7 @@ a { text-decoration:none; }
   if(prop.terms){
     const lines = Array.isArray(prop.terms)
       ? prop.terms.filter(Boolean)
-      : prop.terms.split('\n').filter(Boolean);
+      : prop.terms.split(/<br\s*\/?>|\n/i).map(t=>t.replace(/<[^>]+>/g,'').trim()).filter(Boolean);
     if(lines.length){
       document.getElementById('secTerms').style.display = 'block';
       document.getElementById('termsList').innerHTML = lines.map(t=>`

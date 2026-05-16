@@ -848,9 +848,8 @@
     .status-aprovada { background:rgba(100,220,60,.15); color:#a7de34; }
     .status-recusada { background:rgba(232,69,69,.15);  color:#e84545; }
 
-    .prop-editor { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:10px; }
-    @media(max-width:900px){ .prop-editor { grid-template-columns:1fr; } }
-    .prop-form-col { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; overflow-y:auto; max-height:80vh; }
+    .prop-editor { display:block; margin-top:10px; }
+    .prop-form-col { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; }
     .prop-preview-col { position:sticky; top:0; }
     .prop-preview-wrap { background:#fff; border-radius:12px; overflow:hidden; max-height:80vh; overflow-y:auto; }
     .prop-preview-bar { background:var(--card); border:1px solid var(--border); border-radius:10px 10px 0 0; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; }
@@ -2035,8 +2034,9 @@
         </div>
 
         <div class="prop-editor">
-          <!-- FORM -->
           <div class="prop-form-col">
+
+            <!-- 📋 Dados -->
             <div class="form-section-title" style="margin-bottom:16px;">📋 Dados da proposta</div>
             <div class="form-grid form-grid-2">
               <div class="form-group">
@@ -2081,19 +2081,35 @@
               </div>
             </div>
 
-            <div class="form-section-title" style="margin:20px 0 16px;">✍️ Apresentação</div>
+            <!-- ✍️ Apresentação -->
+            <div class="form-section-title" style="margin:24px 0 14px;">✍️ Apresentação</div>
             <div class="form-group">
               <label class="form-label">Texto de abertura</label>
-              <div id="pfIntroWrap"></div>
-              <script>document.getElementById('pfIntroWrap').innerHTML=richEditorHTML('pfIntro','Prezado(a) João, é com grande satisfação que apresento esta proposta...','90px');</script>
+              <div class="rich-editor-wrap">
+                <div class="rich-toolbar">
+                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('fontSize','5')" title="Texto grande" type="button">A↑</button>
+                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('removeFormat')" title="Normal" type="button">A</button>
+                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('fontSize','2')" title="Texto pequeno" type="button">A↓</button>
+                  <span class="rich-btn sep"></span>
+                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('bold')" title="Negrito" type="button"><b>N</b></button>
+                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('italic')" title="Itálico" type="button"><i>I</i></button>
+                </div>
+                <div class="rich-editor-content" id="pfIntro" contenteditable="true"
+                     data-ph="Prezado(a) João, é com grande satisfação que apresento esta proposta..."
+                     style="min-height:100px"
+                     onfocus="_richFocus=this" onblur="_richFocus=this"
+                     oninput="updatePropPreview()"></div>
+              </div>
             </div>
 
-            <div class="form-section-title" style="margin:20px 0 16px;">📦 Itens / Entregáveis</div>
+            <!-- 📦 Itens -->
+            <div class="form-section-title" style="margin:24px 0 14px;">📦 Itens / Entregáveis</div>
             <div class="prop-items-list" id="pfItemsList"></div>
             <button class="btn-add-item" id="pfAddItem">+ Adicionar item</button>
 
+            <!-- 🎨 Blocos -->
             <div class="form-section-title" style="margin:28px 0 10px;">🎨 Blocos Visuais</div>
-            <div style="font-size:.78rem;color:var(--muted);margin-bottom:14px;">Adicione imagens, antes/depois com arrastar, mockup de celular com vídeo, galeria e destaques. O cliente vê tudo na página da proposta.</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:14px;">Adicione imagens, antes/depois, mockup de celular com vídeo, galeria e destaques.</div>
             <div id="pfBlocksList"></div>
             <div class="blocks-add-bar" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
               <span style="font-size:.72rem;color:var(--muted);align-self:center;flex-shrink:0;">+ bloco:</span>
@@ -2105,7 +2121,8 @@
               <button class="btn btn-ghost btn-sm" onclick="addPropBlock('highlight')">💬 Destaque</button>
             </div>
 
-            <div class="form-section-title" style="margin:20px 0 16px;">💰 Investimento</div>
+            <!-- 💰 Investimento -->
+            <div class="form-section-title" style="margin:24px 0 14px;">💰 Investimento</div>
             <div class="form-grid form-grid-2">
               <div class="form-group">
                 <label class="form-label">Valor total (R$) *</label>
@@ -2113,25 +2130,49 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Forma de pagamento</label>
-                <div id="pfPaymentWrap"></div>
-                <script>document.getElementById('pfPaymentWrap').innerHTML=richEditorHTML('pfPayment','50% na aprovação, 50% na entrega','56px');</script>
+                <div class="rich-editor-wrap">
+                  <div class="rich-toolbar">
+                    <button class="rich-btn" onmousedown="event.preventDefault();richCmd('fontSize','5')" title="Texto grande" type="button">A↑</button>
+                    <button class="rich-btn" onmousedown="event.preventDefault();richCmd('removeFormat')" title="Normal" type="button">A</button>
+                    <button class="rich-btn" onmousedown="event.preventDefault();richCmd('fontSize','2')" title="Texto pequeno" type="button">A↓</button>
+                    <span class="rich-btn sep"></span>
+                    <button class="rich-btn" onmousedown="event.preventDefault();richCmd('bold')" title="Negrito" type="button"><b>N</b></button>
+                    <button class="rich-btn" onmousedown="event.preventDefault();richCmd('italic')" title="Itálico" type="button"><i>I</i></button>
+                  </div>
+                  <div class="rich-editor-content" id="pfPayment" contenteditable="true"
+                       data-ph="50% na aprovação, 50% na entrega"
+                       style="min-height:60px"
+                       onfocus="_richFocus=this" onblur="_richFocus=this"
+                       oninput="updatePropPreview()"></div>
+                </div>
               </div>
             </div>
 
-            <div class="form-section-title" style="margin:20px 0 16px;">📌 Condições</div>
+            <!-- 📌 Termos -->
+            <div class="form-section-title" style="margin:24px 0 14px;">📌 Termos e condições</div>
             <div class="form-group">
-              <label class="form-label">Termos e condições</label>
-              <textarea class="form-textarea" id="pfTerms" rows="4" placeholder="• Revisões incluídas: até 2 rodadas&#10;• Prazo de entrega após aprovação&#10;• Direitos do material final transferidos ao cliente"></textarea>
+              <label class="form-label">Condições da proposta</label>
+              <div class="rich-editor-wrap">
+                <div class="rich-toolbar">
+                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('fontSize','5')" title="Texto grande" type="button">A↑</button>
+                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('removeFormat')" title="Normal" type="button">A</button>
+                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('fontSize','2')" title="Texto pequeno" type="button">A↓</button>
+                  <span class="rich-btn sep"></span>
+                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('bold')" title="Negrito" type="button"><b>N</b></button>
+                  <button class="rich-btn" onmousedown="event.preventDefault();richCmd('italic')" title="Itálico" type="button"><i>I</i></button>
+                </div>
+                <div class="rich-editor-content" id="pfTerms" contenteditable="true"
+                     data-ph="• Revisões incluídas: até 2 rodadas&#10;• Prazo de entrega após aprovação&#10;• Direitos transferidos ao cliente"
+                     style="min-height:130px"
+                     onfocus="_richFocus=this" onblur="_richFocus=this"
+                     oninput="updatePropPreview()"></div>
+              </div>
+              <div style="font-size:.72rem;color:var(--muted);margin-top:6px;">Use Enter para cada item. Vira lista automática na proposta.</div>
             </div>
-          </div>
 
-          <!-- PREVIEW -->
-          <div class="prop-preview-col">
-            <div class="prop-preview-bar">
-              <span class="prop-preview-label">👁 Preview da proposta</span>
-              <span style="font-size:.7rem;color:var(--muted);">atualiza ao digitar</span>
-            </div>
-            <div class="prop-preview-wrap" id="propPreview"></div>
+            <!-- hidden preview (mantido para JS de print) -->
+            <div id="propPreview" style="display:none"></div>
+
           </div>
         </div>
       </div>
@@ -3564,7 +3605,7 @@ function openPropEditor(id, prefill){
   document.getElementById('pfIntro').innerHTML  = toRichHTML(prop ? prop.intro : (prefill ? `Prezado(a) ${prefill.name||'cliente'},\n\nÉ com grande satisfação que apresento esta proposta para o serviço de ${prefill.service||'criação com IA'}. Coloco minha expertise à disposição para entregar resultados que elevem sua presença no mercado imobiliário.` : ''));
   document.getElementById('pfTotal').value     = prop ? (prop.total||'') : '';
   document.getElementById('pfPayment').innerHTML = toRichHTML(prop ? (prop.payment||'') : '50% na aprovação, 50% na entrega');
-  document.getElementById('pfTerms').value     = prop ? (prop.terms||'') : '• Revisões incluídas: até 2 rodadas\n• Material enviado em até 5 dias úteis após aprovação\n• Direitos do material final transferidos integralmente ao cliente';
+  document.getElementById('pfTerms').innerHTML  = toRichHTML(prop ? (prop.terms||'') : '• Revisões incluídas: até 2 rodadas\n• Material enviado em até 5 dias úteis após aprovação\n• Direitos do material final transferidos integralmente ao cliente');
 
   _propItems = prop ? JSON.parse(JSON.stringify(prop.items||[])) : [];
   if(!_propItems.length && prefill?.service) _propItems = [{ desc: prefill.service, details:'', value:0 }];
@@ -3757,7 +3798,7 @@ function buildProposalHTML(p, forPrint){
       </tbody>
     </table>` : '';
 
-  const terms = (p.terms||'').split('\n').filter(Boolean).map(t=>`<li style="margin-bottom:6px;">${t.replace(/^[•·-]\s*/,'')}</li>`).join('');
+  const terms = (p.terms||'').split(/<br\s*\/?>|\n/i).map(t=>t.replace(/<[^>]+>/g,'').trim()).filter(Boolean).map(t=>`<li style="margin-bottom:6px;">${t.replace(/^[•·-]\s*/,'')}</li>`).join('');
 
   return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"/>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
@@ -3859,7 +3900,7 @@ function updatePropPreview(){
     items:      _propItems,
     total:      document.getElementById('pfTotal').value,
     payment:    document.getElementById('pfPayment').innerHTML,
-    terms:      document.getElementById('pfTerms').value,
+    terms:      document.getElementById('pfTerms').innerHTML,
   };
   const frame = document.getElementById('propPreview');
   frame.innerHTML = buildProposalHTML(p, false);
@@ -3889,7 +3930,7 @@ function collectPropForm(){
     blocks:     JSON.parse(JSON.stringify(_propBlocks)),
     total:      parseFloat(document.getElementById('pfTotal').value)||0,
     payment:    document.getElementById('pfPayment').innerHTML,
-    terms:      document.getElementById('pfTerms').value.trim(),
+    terms:      document.getElementById('pfTerms').innerHTML,
     date:       new Date().toISOString(),
   };
 }
