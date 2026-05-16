@@ -1748,7 +1748,7 @@ a { text-decoration:none; }
   setText('step3Title',  prop.step3Title,  'Começamos!');
   setText('step3Desc',   prop.step3Desc,   'Com tudo combinado, damos início ao projeto na data acordada.');
   if(prop.ctaBtn){ const b = document.getElementById('btnAccept'); if(b) b.textContent = prop.ctaBtn; }
-  if(prop.ctaAlt){ const link = document.querySelector('#ctaAlt a'); if(link) link.textContent = prop.ctaAlt; }
+  if(prop.ctaAlt){ const link = document.querySelector('#ctaAlt a'); if(link){ const t = prop.ctaAlt.replace(/^ainda tem dúvidas\??\s*/i,'').trim(); link.textContent = t || prop.ctaAlt; } }
   if(prop.acceptedBanner){ const ab = document.getElementById('acceptedBanner'); if(ab) ab.textContent = prop.acceptedBanner; }
   const invNoteEl = document.querySelector('.inv-note');
   if(invNoteEl && prop.invNote) invNoteEl.innerHTML = `<span class="inv-note-icon">✓</span>${prop.invNote}`;
