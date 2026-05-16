@@ -1337,20 +1337,20 @@ a { text-decoration:none; }
         <div class="step-card">
           <div class="step-num">01</div>
           <span class="step-icon">✅</span>
-          <div class="step-title">Você aceita</div>
-          <div class="step-desc">Clique no botão de aceite. Isso confirma seu interesse e me avisa na hora — sem burocracia.</div>
+          <div class="step-title" id="step1Title">Você aceita</div>
+          <div class="step-desc" id="step1Desc">Clique no botão de aceite. Isso confirma seu interesse e me avisa na hora — sem burocracia.</div>
         </div>
         <div class="step-card">
           <div class="step-num">02</div>
           <span class="step-icon">💬</span>
-          <div class="step-title">Entro em contato</div>
-          <div class="step-desc">Logo após o aceite, entro em contato pelo WhatsApp para alinharmos todos os detalhes do projeto.</div>
+          <div class="step-title" id="step2Title">Entro em contato</div>
+          <div class="step-desc" id="step2Desc">Logo após o aceite, entro em contato pelo WhatsApp para alinharmos todos os detalhes do projeto.</div>
         </div>
         <div class="step-card">
           <div class="step-num">03</div>
           <span class="step-icon">🚀</span>
-          <div class="step-title">Começamos!</div>
-          <div class="step-desc">Com tudo combinado, coloco mãos à obra e entrego o resultado com qualidade e no prazo combinado.</div>
+          <div class="step-title" id="step3Title">Começamos!</div>
+          <div class="step-desc" id="step3Desc">Com tudo combinado, coloco mãos à obra e entrego o resultado com qualidade e no prazo combinado.</div>
         </div>
       </div>
     </div>
@@ -1373,8 +1373,8 @@ a { text-decoration:none; }
   <section class="sec sec-white reveal" id="secTerms" style="display:none">
     <div class="sec-inner">
       <div class="sec-eyebrow">Termos &amp; condições</div>
-      <h2 class="sec-title">O que<br>combinamos</h2>
-      <p class="terms-intro">Por favor, leia com atenção os termos abaixo antes de aceitar esta proposta.</p>
+      <h2 class="sec-title" id="termsTitle">O que<br>combinamos</h2>
+      <p class="terms-intro" id="termsIntro">Por favor, leia com atenção os termos abaixo antes de aceitar esta proposta.</p>
       <ul class="terms-list" id="termsList"></ul>
     </div>
   </section>
@@ -1384,9 +1384,9 @@ a { text-decoration:none; }
   ══════════════════ -->
   <section class="sec sec-blue reveal" id="ctaSection">
     <div class="cta-inner">
-      <div class="cta-pre">próximo passo</div>
-      <h2 class="cta-title">Vamos<br><em>fechar?</em></h2>
-      <p class="cta-sub">Leu tudo e está de acordo com os termos? Confirme o aceite abaixo e eu entro em contato para alinhar cada detalhe com você.</p>
+      <div class="cta-pre" id="ctaPre">próximo passo</div>
+      <h2 class="cta-title" id="ctaTitle">Vamos<br><em>fechar?</em></h2>
+      <p class="cta-sub" id="ctaSub">Leu tudo e está de acordo com os termos? Confirme o aceite abaixo e eu entro em contato para alinhar cada detalhe com você.</p>
       <button class="btn-accept" id="btnAccept">Aceitar esta proposta</button>
       <div class="cta-divider"></div>
       <div class="cta-alt" id="ctaAlt">
@@ -1750,6 +1750,32 @@ a { text-decoration:none; }
     }
   }
 
+  /* ── Textos personalizáveis ── */
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const setText = (id, val, fallback) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const src = (val && val.trim()) ? val : (fallback || null);
+    if(!src) return;
+    /* preserve line-breaks as <br> in HTML elements */
+    el.innerHTML = esc(src).replace(/\n/g,'<br>');
+  };
+  setText('termsTitle',  prop.termsTitle,  'O que\ncombinamos');
+  setText('termsIntro',  prop.termsIntro,  'Por favor, leia com atenção os termos abaixo antes de aceitar esta proposta.');
+  setText('ctaTitle',    prop.ctaTitle,    'Vamos\nfechar?');
+  setText('ctaSub',      prop.ctaSub,      'Leu tudo e está de acordo com os termos? Confirme abaixo para formalizar o início do trabalho.');
+  setText('step1Title',  prop.step1Title,  'Você aceita');
+  setText('step1Desc',   prop.step1Desc,   'Clique no botão de aceite abaixo para confirmar que leu e concorda com os termos.');
+  setText('step2Title',  prop.step2Title,  'Entro em contato');
+  setText('step2Desc',   prop.step2Desc,   'Logo após o aceite, eu entro em contato pelo WhatsApp para alinharmos os próximos passos.');
+  setText('step3Title',  prop.step3Title,  'Começamos!');
+  setText('step3Desc',   prop.step3Desc,   'Com tudo combinado, damos início ao projeto na data acordada.');
+  if(prop.ctaBtn){ const b = document.getElementById('btnAccept'); if(b) b.textContent = prop.ctaBtn; }
+  if(prop.ctaAlt){ const a = document.getElementById('ctaAlt'); if(a){ const link = a.querySelector('a')||a; link.textContent = prop.ctaAlt; } }
+  if(prop.acceptedBanner){ const ab = document.getElementById('acceptedBanner'); if(ab) ab.textContent = prop.acceptedBanner; }
+  const invNoteEl = document.querySelector('.inv-note');
+  if(invNoteEl && prop.invNote) invNoteEl.innerHTML = `<span class="inv-note-icon">✓</span>${prop.invNote}`;
+
   /* ── WhatsApp ── */
   const wpp = (prop._wpp||'').replace(/\D/g,'');
   const wppBase = wpp ? `https://wa.me/${wpp}` : null;
@@ -1825,7 +1851,9 @@ a { text-decoration:none; }
 
     /* success sub */
     document.getElementById('successSub').textContent =
-      `Ótimo, ${firstName}! Vou entrar em contato pelo WhatsApp para alinharmos os próximos passos. Obrigada pela confiança!`;
+      prop.successMsg
+        ? prop.successMsg.replace(/\{nome\}/gi, firstName)
+        : `Ótimo, ${firstName}! Vou entrar em contato pelo WhatsApp para alinharmos os próximos passos. Obrigada pela confiança!`;
 
     document.getElementById('confirmOverlay').classList.remove('open');
     document.getElementById('mainView').style.display = 'none';

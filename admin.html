@@ -2170,6 +2170,84 @@
               <div style="font-size:.72rem;color:var(--muted);margin-top:6px;">Use Enter para cada item. Vira lista automática na proposta.</div>
             </div>
 
+            <!-- 📝 Textos personalizáveis -->
+            <div class="form-section-title" style="margin:24px 0 14px;">📝 Textos personalizáveis</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-bottom:16px;">Edite todos os textos fixos que aparecem na proposta do cliente.</div>
+
+            <div style="font-size:.8rem;font-weight:700;color:var(--accent);margin:0 0 10px;text-transform:uppercase;letter-spacing:.08em;">Termos & Condições</div>
+            <div class="form-grid form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Título da seção</label>
+                <input class="form-input" type="text" id="pfTermsTitle" placeholder="O que combinamos"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Subtítulo / intro</label>
+                <input class="form-input" type="text" id="pfTermsIntro" placeholder="Por favor, leia com atenção..."/>
+              </div>
+            </div>
+
+            <div style="font-size:.8rem;font-weight:700;color:var(--accent);margin:16px 0 10px;text-transform:uppercase;letter-spacing:.08em;">Chamada para Ação (CTA)</div>
+            <div class="form-grid form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Título principal</label>
+                <input class="form-input" type="text" id="pfCtaTitle" placeholder="Vamos fechar?"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Texto do botão</label>
+                <input class="form-input" type="text" id="pfCtaBtn" placeholder="Aceitar esta proposta"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Parágrafo do CTA</label>
+              <textarea class="form-textarea" id="pfCtaSub" rows="2" placeholder="Leu tudo e está de acordo com os termos? Confirme o aceite abaixo..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Link alternativo ("Ainda tem dúvidas?")</label>
+              <input class="form-input" type="text" id="pfCtaAlt" placeholder="Ainda tem dúvidas? Fale comigo pelo WhatsApp"/>
+            </div>
+
+            <div style="font-size:.8rem;font-weight:700;color:var(--accent);margin:16px 0 10px;text-transform:uppercase;letter-spacing:.08em;">Como funciona? (3 passos)</div>
+            <div class="form-grid form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Passo 1 — título</label>
+                <input class="form-input" type="text" id="pfStep1Title" placeholder="Você aceita"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Passo 1 — descrição</label>
+                <input class="form-input" type="text" id="pfStep1Desc" placeholder="Clique no botão de aceite..."/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Passo 2 — título</label>
+                <input class="form-input" type="text" id="pfStep2Title" placeholder="Entro em contato"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Passo 2 — descrição</label>
+                <input class="form-input" type="text" id="pfStep2Desc" placeholder="Logo após o aceite, entro em contato..."/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Passo 3 — título</label>
+                <input class="form-input" type="text" id="pfStep3Title" placeholder="Começamos!"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Passo 3 — descrição</label>
+                <input class="form-input" type="text" id="pfStep3Desc" placeholder="Com tudo combinado, coloco mãos à obra..."/>
+              </div>
+            </div>
+
+            <div style="font-size:.8rem;font-weight:700;color:var(--accent);margin:16px 0 10px;text-transform:uppercase;letter-spacing:.08em;">Mensagens automáticas</div>
+            <div class="form-group">
+              <label class="form-label">Mensagem de sucesso (após aceite)</label>
+              <textarea class="form-textarea" id="pfSuccessMsg" rows="2" placeholder="Ótimo! Vou entrar em contato pelo WhatsApp..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Banner "já aceitou"</label>
+              <input class="form-input" type="text" id="pfAcceptedBanner" placeholder="✅ Você já aceitou esta proposta. Em breve entro em contato!"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nota de investimento (rodapé da seção)</label>
+              <input class="form-input" type="text" id="pfInvNote" placeholder="Este investimento inclui tudo o que está descrito acima, sem taxas ocultas."/>
+            </div>
+
             <!-- hidden preview (mantido para JS de print) -->
             <div id="propPreview" style="display:none"></div>
 
@@ -3607,6 +3685,25 @@ function openPropEditor(id, prefill){
   document.getElementById('pfPayment').innerHTML = toRichHTML(prop ? (prop.payment||'') : '50% na aprovação, 50% na entrega');
   document.getElementById('pfTerms').innerHTML  = toRichHTML(prop ? (prop.terms||'') : '• Revisões incluídas: até 2 rodadas\n• Material enviado em até 5 dias úteis após aprovação\n• Direitos do material final transferidos integralmente ao cliente');
 
+  // textos personalizáveis
+  const T = prop || {};
+  const v = (id, def) => { const el = document.getElementById(id); if(el) el.value = T[id.replace('pf','')] !== undefined ? (T[id.replace('pf','')] || def) : def; };
+  document.getElementById('pfTermsTitle').value  = T.termsTitle  ?? 'O que combinamos';
+  document.getElementById('pfTermsIntro').value  = T.termsIntro  ?? 'Por favor, leia com atenção os termos abaixo antes de aceitar esta proposta.';
+  document.getElementById('pfCtaTitle').value    = T.ctaTitle    ?? 'Vamos fechar?';
+  document.getElementById('pfCtaSub').value      = T.ctaSub      ?? 'Leu tudo e está de acordo com os termos? Confirme o aceite abaixo e eu entro em contato para alinhar cada detalhe com você.';
+  document.getElementById('pfCtaBtn').value      = T.ctaBtn      ?? 'Aceitar esta proposta';
+  document.getElementById('pfCtaAlt').value      = T.ctaAlt      ?? 'Ainda tem dúvidas? Fale comigo pelo WhatsApp';
+  document.getElementById('pfStep1Title').value  = T.step1Title  ?? 'Você aceita';
+  document.getElementById('pfStep1Desc').value   = T.step1Desc   ?? 'Clique no botão de aceite. Isso confirma seu interesse e me avisa na hora — sem burocracia.';
+  document.getElementById('pfStep2Title').value  = T.step2Title  ?? 'Entro em contato';
+  document.getElementById('pfStep2Desc').value   = T.step2Desc   ?? 'Logo após o aceite, entro em contato pelo WhatsApp para alinharmos todos os detalhes do projeto.';
+  document.getElementById('pfStep3Title').value  = T.step3Title  ?? 'Começamos!';
+  document.getElementById('pfStep3Desc').value   = T.step3Desc   ?? 'Com tudo combinado, coloco mãos à obra e entrego o resultado com qualidade e no prazo combinado.';
+  document.getElementById('pfSuccessMsg').value  = T.successMsg  ?? 'Ótimo! Vou entrar em contato pelo WhatsApp para alinharmos os próximos passos. Obrigada pela confiança!';
+  document.getElementById('pfAcceptedBanner').value = T.acceptedBanner ?? '✅ Você já aceitou esta proposta. Em breve entro em contato pelo WhatsApp!';
+  document.getElementById('pfInvNote').value     = T.invNote     ?? 'Este investimento inclui tudo o que está descrito acima, sem taxas ocultas ou surpresas.';
+
   _propItems = prop ? JSON.parse(JSON.stringify(prop.items||[])) : [];
   if(!_propItems.length && prefill?.service) _propItems = [{ desc: prefill.service, details:'', value:0 }];
   _propBlocks = prop ? JSON.parse(JSON.stringify(prop.blocks||[])) : [];
@@ -3917,21 +4014,38 @@ function printProposal(id){
 }
 
 function collectPropForm(){
+  const gv = id => (document.getElementById(id)||{}).value || '';
   return {
     id:         _propEditId || genId('prop_'),
-    number:     document.getElementById('pfNum').value,
-    status:     document.getElementById('pfStatus').value,
-    client:     document.getElementById('pfClient').value.trim(),
-    clientRole: document.getElementById('pfClientRole').value.trim(),
-    service:    document.getElementById('pfService').value,
-    validUntil: document.getElementById('pfValid').value,
+    number:     gv('pfNum'),
+    status:     gv('pfStatus'),
+    client:     gv('pfClient').trim(),
+    clientRole: gv('pfClientRole').trim(),
+    service:    gv('pfService'),
+    validUntil: gv('pfValid'),
     intro:      document.getElementById('pfIntro').innerHTML,
     items:      _propItems,
     blocks:     JSON.parse(JSON.stringify(_propBlocks)),
-    total:      parseFloat(document.getElementById('pfTotal').value)||0,
+    total:      parseFloat(gv('pfTotal'))||0,
     payment:    document.getElementById('pfPayment').innerHTML,
     terms:      document.getElementById('pfTerms').innerHTML,
     date:       new Date().toISOString(),
+    // textos personalizáveis
+    termsTitle:     gv('pfTermsTitle'),
+    termsIntro:     gv('pfTermsIntro'),
+    ctaTitle:       gv('pfCtaTitle'),
+    ctaSub:         gv('pfCtaSub'),
+    ctaBtn:         gv('pfCtaBtn'),
+    ctaAlt:         gv('pfCtaAlt'),
+    step1Title:     gv('pfStep1Title'),
+    step1Desc:      gv('pfStep1Desc'),
+    step2Title:     gv('pfStep2Title'),
+    step2Desc:      gv('pfStep2Desc'),
+    step3Title:     gv('pfStep3Title'),
+    step3Desc:      gv('pfStep3Desc'),
+    successMsg:     gv('pfSuccessMsg'),
+    acceptedBanner: gv('pfAcceptedBanner'),
+    invNote:        gv('pfInvNote'),
   };
 }
 
